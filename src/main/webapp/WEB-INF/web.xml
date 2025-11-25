@@ -3,4 +3,45 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
+
+<!--    <servlet>-->
+<!--        <servlet-name>LoginServlet</servlet-name>-->
+<!--        <servlet-class>com.universitylearningplatform.servlet.LoginServlet</servlet-class>-->
+<!--    </servlet>-->
+<!--    <servlet-mapping>-->
+<!--        <servlet-name>LoginServlet</servlet-name>-->
+<!--        <url-pattern>/login</url-pattern>-->
+<!--    </servlet-mapping>-->
+
+<!--        <servlet-name>RegisterServlet</servlet-name>-->
+<!--        <servlet-class>com.universitylearningplatform.servlet.RegisterServlet</servlet-class>-->
+<!--    </servlet>-->
+<!--    <servlet-mapping>-->
+<!--        <servlet-name>RegisterServlet</servlet-name>-->
+<!--        <url-pattern>/register</url-pattern>-->
+<!--    </servlet-mapping>-->
+
+<!--    <servlet>-->
+<!--        <servlet-name>ProfileServlet</servlet-name>-->
+<!--        <servlet-class>com.universitylearningplatform.servlet.ProfileServlet</servlet-class>-->
+<!--        <multipart-config>-->
+<!--            <location>/tmp</location>-->
+<!--            <max-file-size>10485760</max-file-size> &lt;!&ndash; 10MB &ndash;&gt;-->
+<!--            <max-request-size>10485760</max-request-size>-->
+<!--            <file-size-threshold>0</file-size-threshold>-->
+<!--        </multipart-config>-->
+<!--    </servlet>-->
+<!--    <servlet-mapping>-->
+<!--        <servlet-name>ProfileServlet</servlet-name>-->
+<!--        <url-pattern>/profile</url-pattern>-->
+<!--    </servlet-mapping>-->
+
+    <session-config>
+        <session-timeout>30</session-timeout> <!-- 30 minutes -->
+    </session-config>
+
+    <welcome-file-list>
+        <welcome-file>login.jsp</welcome-file>
+    </welcome-file-list>
+
 </web-app>
