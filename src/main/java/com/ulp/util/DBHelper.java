@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DBHelper {
     public static String getConnectionString() {
-        return "jdbc:mysql://172.19.185.115:3306/csdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        return "jdbc:mysql://172.19.185.115:3306/ulpdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     }
     public static String getUsername() {
         return "devplogin";

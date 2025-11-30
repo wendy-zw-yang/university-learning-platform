@@ -1,11 +1,49 @@
 package com.ulp.bean;
 
+import java.sql.Timestamp;
+
 public class UserModel {
+    private String id;
     private String username;
     private String password;
     private String role; // "admin", "student", "teacher"
     private String email;
     private String avatar; // File path or URL
+    private String profile;
+    private String title;
+    private Timestamp createdAt;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
 
     // Constructors
     public UserModel() {}
@@ -36,9 +74,11 @@ public class UserModel {
 
     // Validation method
     public boolean validate() {
-        return username != null && !username.isEmpty() &&
+        boolean valid= username != null && !username.isEmpty() &&
                 password != null && !password.isEmpty() &&
-                role != null && (role.equals("admin") || role.equals("student") || role.equals("teacher")) &&
-                email != null && email.matches("^[\\w-_.+]*[\\w-_.]@([\\w]+[.])+[\\w]+$"); // Basic email regex
+                role != null && (role.equals("admin") || role.equals("student") || role.equals("teacher"));
+        if(email!= null && !email.isEmpty())
+            valid = valid && email.matches("^[\\w-_.+]*[\\w-_.]@([\\w]+[.])+[\\w]+$"); // Basic email regex
+        return valid;
     }
 }
