@@ -1,6 +1,6 @@
-package com.universitylearningplatform.service;
+package com.ulp.service;
 
-import com.universitylearningplatform.bean.UserModel;
+import com.ulp.bean.UserModel;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package com.universitylearningplatform.bean;
+package com.ulp.bean;
 
 public class UserModel {
     private String username;

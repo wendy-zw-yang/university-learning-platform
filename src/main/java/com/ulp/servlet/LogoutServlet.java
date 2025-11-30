@@ -1,4 +1,4 @@
-package com.universitylearningplatform.servlet;
+package com.ulp.servlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

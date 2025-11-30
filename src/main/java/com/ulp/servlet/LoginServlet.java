@@ -1,7 +1,7 @@
-package com.universitylearningplatform.servlet;
+package com.ulp.servlet;
 
-import com.universitylearningplatform.bean.UserModel;
-import com.universitylearningplatform.service.AuthService;
+import com.ulp.bean.UserModel;
+import com.ulp.service.AuthService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

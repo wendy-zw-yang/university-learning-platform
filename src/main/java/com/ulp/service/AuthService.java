@@ -1,6 +1,6 @@
-package com.universitylearningplatform.service;
+package com.ulp.service;
 
-import com.universitylearningplatform.bean.UserModel;
+import com.ulp.bean.UserModel;
 
 public class AuthService {
     // Simulate database or storage (in-memory for now)
@@ -17,6 +17,7 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid user data");
         }
         // Mock: Save to DB (print for simulation)
+
         System.out.println("Registered user: " + user.getUsername());
     }
 }

@@ -39,3 +39,5 @@ build/
 .idea/encodings.xml
 .idea/misc.xml
 .idea/vcs.xml
+src/main/webapp/index.jsp
+src/main/webapp/index.jsp
