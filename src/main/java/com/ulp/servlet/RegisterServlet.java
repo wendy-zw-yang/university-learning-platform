@@ -29,7 +29,7 @@ public class RegisterServlet extends HttpServlet {
         UserModel user = new UserModel(username, password, "student", email, null); // Only student
         try {
             authService.registerUser(user);
-            resp.sendRedirect("/login"); // Redirect to login after success
+            resp.sendRedirect("login.jsp"); // Redirect to login after success
         } catch (IllegalArgumentException e) {
             req.setAttribute("error", e.getMessage());
             doGet(req, resp);

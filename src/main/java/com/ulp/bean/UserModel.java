@@ -6,11 +6,11 @@ public class UserModel {
     private String id;
     private String username;
     private String password;
-    private String role; // "admin", "student", "teacher"
+    private String role="student"; // "admin", "student", "teacher"
     private String email;
-    private String avatar; // File path or URL
-    private String profile;
-    private String title;
+    private String avatar; // 头像路径
+    private String profile; // 简介，仅教师用
+    private String title; // 职称，仅教师用
     private Timestamp createdAt;
 
     public String getId() {

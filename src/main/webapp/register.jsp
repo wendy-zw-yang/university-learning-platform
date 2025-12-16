@@ -13,7 +13,17 @@
     <label>Username: <input type="text" name="username" required></label><br>
     <label>Password: <input type="password" name="password" required></label><br>
     <label>Email: <input type="email" name="email" required></label><br>
-    <input type="submit" value="Register">
+    <select name="role">
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+        <option value="admin">Admin</option>
+    </select>
+
+    <input type="text" name="avatar" placeholder="Avatar URL" />
+    <textarea name="profile" placeholder="Profile"></textarea>
+    <input type="text" name="title" placeholder="Title" />
+
+    <button type="submit">Register</button>
 </form>
 </body>
 </html>
