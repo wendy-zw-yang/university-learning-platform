@@ -1,8 +1,8 @@
 package com.ulp.service;
 
-import com.ulp.Dao.ResourceDao;
-import com.ulp.Dao.impl.ResourceDaoImpl;
-import com.ulp.bean.Resource;
+import com.ulp.dao.ResourceDao;
+import com.ulp.dao.impl.ResourceDaoImpl;
+import com.ulp.bean.ResourceModel;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ public class ResourceService {
     }
 
     // 添加资源
-    public boolean addResource(Resource resource) {
-        if (resource == null || resource.getTitle() == null || resource.getFilePath() == null) {
+    public boolean addResource(ResourceModel resourceModel) {
+        if (resourceModel == null || resourceModel.getTitle() == null || resourceModel.getFilePath() == null) {
             return false;
         }
-        return resourceDao.addResource(resource);
+        return resourceDao.addResource(resourceModel);
     }
 
     // 删除资源
@@ -30,15 +30,15 @@ public class ResourceService {
     }
 
     // 更新资源信息
-    public boolean updateResource(Resource resource) {
-        if (resource == null || resource.getId() == null || resource.getId() <= 0) {
+    public boolean updateResource(ResourceModel resourceModel) {
+        if (resourceModel == null || resourceModel.getId() == null || resourceModel.getId() <= 0) {
             return false;
         }
-        return resourceDao.updateResource(resource);
+        return resourceDao.updateResource(resourceModel);
     }
 
     // 根据 Id 获取资源
-    public Resource getResourceById(Integer id) {
+    public ResourceModel getResourceById(Integer id) {
         if (id == null || id <= 0) {
             return null;
         }
@@ -46,12 +46,12 @@ public class ResourceService {
     }
 
     // 获取所有资源
-    public List<Resource> getAllResources() {
+    public List<ResourceModel> getAllResources() {
         return resourceDao.getAllResources();
     }
 
     // 根据 课程Id 获取资源
-    public List<Resource> getResourcesByCourseId(Integer courseId) {
+    public List<ResourceModel> getResourcesByCourseId(Integer courseId) {
         if (courseId == null || courseId <= 0) {
             return null;
         }
@@ -59,7 +59,7 @@ public class ResourceService {
     }
 
     // 根据上传者ID获取资源列表
-    public List<Resource> getResourcesByUploaderId(Integer uploaderId) {
+    public List<ResourceModel> getResourcesByUploaderId(Integer uploaderId) {
         if (uploaderId == null || uploaderId <= 0) {
             return null;
         }
@@ -75,7 +75,7 @@ public class ResourceService {
     }
 
     // 根据标题搜索资源
-    public List<Resource> searchResourcesByTitle(String title) {
+    public List<ResourceModel> searchResourcesByTitle(String title) {
         if (title == null || title.trim().isEmpty()) {
             return getAllResources();
         }

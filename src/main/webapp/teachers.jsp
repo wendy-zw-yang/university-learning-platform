@@ -236,18 +236,18 @@
                 <tbody>
                     <% for (TeacherModel teacher : teachers) { %>
                         <tr>
-                            <td><%= teacher.getId() %></td>
-                            <td><strong><%= teacher.getUsername() %></strong></td>
-                            <td><%= teacher.getEmail() != null && !teacher.getEmail().isEmpty() ? teacher.getEmail() : "-" %></td>
-                            <td><%= teacher.getTitle() != null && !teacher.getTitle().isEmpty() ? teacher.getTitle() : "-" %></td>
+                            <td><%= teacher.getUserModel().getId() %></td>
+                            <td><strong><%= teacher.getUserModel().getUsername() %></strong></td>
+                            <td><%= teacher.getUserModel().getEmail() != null && !teacher.getUserModel().getEmail().isEmpty() ? teacher.getUserModel().getEmail() : "-" %></td>
+                            <td><%= teacher.getUserModel().getTitle() != null && !teacher.getUserModel().getTitle().isEmpty() ? teacher.getUserModel().getTitle() : "-" %></td>
                             <td>
-                                <div class="text-truncate" title="<%= teacher.getProfile() != null ? teacher.getProfile() : "" %>">
-                                    <%= teacher.getProfile() != null && !teacher.getProfile().isEmpty() ? teacher.getProfile() : "-" %>
+                                <div class="text-truncate" title="<%= teacher.getUserModel().getProfile() != null ? teacher.getUserModel().getProfile() : "" %>">
+                                    <%= teacher.getUserModel().getProfile() != null && !teacher.getUserModel().getProfile().isEmpty() ? teacher.getUserModel().getProfile() : "-" %>
                                 </div>
                             </td>
                             <td>
                                 <% 
-                                    int courseCount = teacher.getCourseIds() != null ? teacher.getCourseIds().size() : 0;
+                                    int courseCount = teacher.getCourseList() != null ? teacher.getCourseList().size() : 0;
                                     if (courseCount > 0) {
                                 %>
                                     <span class="course-count"><%= courseCount %> 门课程</span>
@@ -257,9 +257,9 @@
                             </td>
                             <td>
                                 <div class="actions-cell">
-                                    <a href="${pageContext.request.contextPath}/admin/teachers?action=edit&id=<%= teacher.getId() %>" 
+                                    <a href="${pageContext.request.contextPath}/admin/teachers?action=edit&id=<%= teacher.getUserModel().getId() %>"
                                        class="btn btn-warning">编辑</a>
-                                    <button onclick="confirmDelete(<%= teacher.getId() %>, '<%= teacher.getUsername() %>')" 
+                                    <button onclick="confirmDelete(<%= teacher.getUserModel().getId() %>, '<%= teacher.getUserModel().getUsername() %>')"
                                             class="btn btn-danger">删除</button>
                                 </div>
                             </td>

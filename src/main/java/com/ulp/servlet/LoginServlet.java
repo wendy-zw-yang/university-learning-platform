@@ -13,8 +13,6 @@ import java.io.IOException;
 
 @WebServlet("/login") // Annotation for mapping (complements web.xml)
 public class LoginServlet extends HttpServlet {
-    private AuthService authService = new AuthService();
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         RequestDispatcher dispatcher = req.getRequestDispatcher("/login.jsp");
@@ -25,6 +23,8 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
+
+        AuthService authService = new AuthService();
         
         // 参数验证
         if (username == null || username.trim().isEmpty() || 

@@ -168,7 +168,7 @@
         </form>
         
         <div class="footer-text">
-            已有账号？ <a href="<%= request.getContextPath() %>/login">立即登录</a>
+            已有账号？ <a href="<%= request.getContextPath() %>/login.jsp">立即登录</a>
         </div>
     </div>
 </body>

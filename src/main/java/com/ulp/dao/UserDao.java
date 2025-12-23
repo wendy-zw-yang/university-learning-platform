@@ -1,4 +1,4 @@
-package com.ulp.Dao;
+package com.ulp.dao;
 
 import com.ulp.bean.UserModel;
 
@@ -37,5 +37,19 @@ public interface UserDao {
      * @param email 邮箱
      * @return 存在返回true，不存在返回false
      */
-    boolean existsByEmail(String email);
+    public boolean existsByEmail(String email);
+
+    /**
+     * 更新数据库中的用户资料
+     * @param user 用户模型
+     */
+    public boolean updateProfileInDatabase(UserModel user);
+
+    /**
+     * 根据用户ID查找用户
+     * @param userId 用户ID
+     * @return 用户对象，如果用户不存在返回null
+     */
+    public UserModel findUserById(int userId);
+    public boolean deleteUserById(int userId);
 }

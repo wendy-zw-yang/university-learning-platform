@@ -1,7 +1,7 @@
-package com.ulp.Dao.impl;
+package com.ulp.dao.impl;
 
-import com.ulp.Dao.ResourceDao;
-import com.ulp.bean.Resource;
+import com.ulp.dao.ResourceDao;
+import com.ulp.bean.ResourceModel;
 import com.ulp.util.DBHelper;
 
 import java.sql.*;
@@ -11,18 +11,18 @@ import java.util.List;
 public class ResourceDaoImpl implements ResourceDao {
 
     @Override
-    public boolean addResource(Resource resource) {
+    public boolean addResource(ResourceModel resourceModel) {
         String sql = "INSERT INTO resources (title, description, file_path, course_id, uploader_id, download_count) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, resource.getTitle());
-            pstmt.setString(2, resource.getDescription());
-            pstmt.setString(3, resource.getFilePath());
-            pstmt.setInt(4, resource.getCourseId());
-            pstmt.setInt(5, resource.getUploaderId());
-            pstmt.setInt(6, resource.getDownloadCount() != null ? resource.getDownloadCount() : 0);
+            pstmt.setString(1, resourceModel.getTitle());
+            pstmt.setString(2, resourceModel.getDescription());
+            pstmt.setString(3, resourceModel.getFilePath());
+            pstmt.setInt(4, resourceModel.getCourseId());
+            pstmt.setInt(5, resourceModel.getUploaderId());
+            pstmt.setInt(6, resourceModel.getDownloadCount() != null ? resourceModel.getDownloadCount() : 0);
             
             return pstmt.executeUpdate() > 0;
             
@@ -49,19 +49,19 @@ public class ResourceDaoImpl implements ResourceDao {
     }
 
     @Override
-    public boolean updateResource(Resource resource) {
+    public boolean updateResource(ResourceModel resourceModel) {
         String sql = "UPDATE resources SET title = ?, description = ?, file_path = ?, course_id = ?, uploader_id = ?, download_count = ? WHERE id = ?";
         
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, resource.getTitle());
-            pstmt.setString(2, resource.getDescription());
-            pstmt.setString(3, resource.getFilePath());
-            pstmt.setInt(4, resource.getCourseId());
-            pstmt.setInt(5, resource.getUploaderId());
-            pstmt.setInt(6, resource.getDownloadCount() != null ? resource.getDownloadCount() : 0);
-            pstmt.setInt(7, resource.getId());
+            pstmt.setString(1, resourceModel.getTitle());
+            pstmt.setString(2, resourceModel.getDescription());
+            pstmt.setString(3, resourceModel.getFilePath());
+            pstmt.setInt(4, resourceModel.getCourseId());
+            pstmt.setInt(5, resourceModel.getUploaderId());
+            pstmt.setInt(6, resourceModel.getDownloadCount() != null ? resourceModel.getDownloadCount() : 0);
+            pstmt.setInt(7, resourceModel.getId());
             
             return pstmt.executeUpdate() > 0;
             
@@ -72,7 +72,7 @@ public class ResourceDaoImpl implements ResourceDao {
     }
 
     @Override
-    public Resource getResourceById(Integer id) {
+    public ResourceModel getResourceById(Integer id) {
         String sql = "SELECT * FROM resources WHERE id = ?";
         
         try (Connection conn = DBHelper.getConnection();
@@ -93,29 +93,29 @@ public class ResourceDaoImpl implements ResourceDao {
     }
 
     @Override
-    public List<Resource> getAllResources() {
+    public List<ResourceModel> getAllResources() {
         String sql = "SELECT * FROM resources ORDER BY created_at DESC";
-        List<Resource> resources = new ArrayList<>();
+        List<ResourceModel> resourceModels = new ArrayList<>();
         
         try (Connection conn = DBHelper.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
             while (rs.next()) {
-                resources.add(extractResourceFromResultSet(rs));
+                resourceModels.add(extractResourceFromResultSet(rs));
             }
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
-        return resources;
+        return resourceModels;
     }
 
     @Override
-    public List<Resource> getResourcesByCourseId(Integer courseId) {
+    public List<ResourceModel> getResourcesByCourseId(Integer courseId) {
         String sql = "SELECT * FROM resources WHERE course_id = ? ORDER BY created_at DESC";
-        List<Resource> resources = new ArrayList<>();
+        List<ResourceModel> resourceModels = new ArrayList<>();
         
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -124,20 +124,20 @@ public class ResourceDaoImpl implements ResourceDao {
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                resources.add(extractResourceFromResultSet(rs));
+                resourceModels.add(extractResourceFromResultSet(rs));
             }
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
-        return resources;
+        return resourceModels;
     }
 
     @Override
-    public List<Resource> getResourcesByUploaderId(Integer uploaderId) {
+    public List<ResourceModel> getResourcesByUploaderId(Integer uploaderId) {
         String sql = "SELECT * FROM resources WHERE uploader_id = ? ORDER BY created_at DESC";
-        List<Resource> resources = new ArrayList<>();
+        List<ResourceModel> resourceModels = new ArrayList<>();
         
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -146,14 +146,14 @@ public class ResourceDaoImpl implements ResourceDao {
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                resources.add(extractResourceFromResultSet(rs));
+                resourceModels.add(extractResourceFromResultSet(rs));
             }
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
-        return resources;
+        return resourceModels;
     }
 
     @Override
@@ -173,9 +173,9 @@ public class ResourceDaoImpl implements ResourceDao {
     }
 
     @Override
-    public List<Resource> searchResourcesByTitle(String title) {
+    public List<ResourceModel> searchResourcesByTitle(String title) {
         String sql = "SELECT * FROM resources WHERE title LIKE ? ORDER BY created_at DESC";
-        List<Resource> resources = new ArrayList<>();
+        List<ResourceModel> resourceModels = new ArrayList<>();
         
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -184,14 +184,14 @@ public class ResourceDaoImpl implements ResourceDao {
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                resources.add(extractResourceFromResultSet(rs));
+                resourceModels.add(extractResourceFromResultSet(rs));
             }
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
-        return resources;
+        return resourceModels;
     }
 
     /**
@@ -200,16 +200,16 @@ public class ResourceDaoImpl implements ResourceDao {
      * @return Resource对象
      * @throws SQLException SQL异常
      */
-    private Resource extractResourceFromResultSet(ResultSet rs) throws SQLException {
-        Resource resource = new Resource();
-        resource.setId(rs.getInt("id"));
-        resource.setTitle(rs.getString("title"));
-        resource.setDescription(rs.getString("description"));
-        resource.setFilePath(rs.getString("file_path"));
-        resource.setCourseId(rs.getInt("course_id"));
-        resource.setUploaderId(rs.getInt("uploader_id"));
-        resource.setDownloadCount(rs.getInt("download_count"));
-        resource.setCreatedAt(rs.getTimestamp("created_at"));
-        return resource;
+    private ResourceModel extractResourceFromResultSet(ResultSet rs) throws SQLException {
+        ResourceModel resourceModel = new ResourceModel();
+        resourceModel.setId(rs.getInt("id"));
+        resourceModel.setTitle(rs.getString("title"));
+        resourceModel.setDescription(rs.getString("description"));
+        resourceModel.setFilePath(rs.getString("file_path"));
+        resourceModel.setCourseId(rs.getInt("course_id"));
+        resourceModel.setUploaderId(rs.getInt("uploader_id"));
+        resourceModel.setDownloadCount(rs.getInt("download_count"));
+        resourceModel.setCreatedAt(rs.getTimestamp("created_at"));
+        return resourceModel;
     }
 }

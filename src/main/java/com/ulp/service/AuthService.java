@@ -1,12 +1,11 @@
 package com.ulp.service;
 
 import com.ulp.bean.UserModel;
-import com.ulp.Dao.UserDao;
-import com.ulp.Dao.impl.UserDaoImpl;
-import com.ulp.util.PasswordUtil;
+import com.ulp.dao.UserDao;
+import com.ulp.dao.impl.UserDaoImpl;
 
 public class AuthService {
-    private UserDao userDao = new UserDaoImpl();
+    private final UserDao userDao = new UserDaoImpl();
 
     /**
      * 用户认证
@@ -29,6 +28,7 @@ public class AuthService {
      * @throws IllegalArgumentException 如果用户数据无效或用户已存在
      */
     public void registerUser(UserModel user) {
+//        System.out.println("准备注册用户："+user.toString());
         // 验证用户数据
         if (!user.validate()) {
             throw new IllegalArgumentException("用户数据无效");
@@ -66,4 +66,22 @@ public class AuthService {
     public boolean isEmailAvailable(String email) {
         return !userDao.existsByEmail(email);
     }
+
+//    public static void main(String[] args) {
+//        AuthService authService = new AuthService();
+//        // 测试用户注册
+//        UserModel user = new UserModel("test", "123456", "student", "test@example.com", null);
+//        try {
+//            authService.registerUser(user);
+//            System.out.println("用户注册成功");
+//        } catch (IllegalArgumentException e) {
+//            System.out.println("用户注册失败：" + e.getMessage());
+//        }
+//
+//        // 测试用户登录
+//        UserModel user2 = authService.authenticate("test", "123456");
+//        if (user2 != null) {
+//            System.out.println("用户login成功");
+//        }
+//    }
 }

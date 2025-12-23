@@ -1,6 +1,6 @@
 package com.ulp.servlet;
 
-import com.ulp.bean.Resource;
+import com.ulp.bean.ResourceModel;
 import com.ulp.bean.UserModel;
 import com.ulp.service.ResourceService;
 import jakarta.servlet.ServletException;
@@ -95,8 +95,8 @@ public class AdminResourceServlet extends HttpServlet {
      * 显示所有资源
      */
     private void showAllResources(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<Resource> resources = resourceService.getAllResources();
-        req.setAttribute("resources", resources);
+        List<ResourceModel> resourceModels = resourceService.getAllResources();
+        req.setAttribute("resources", resourceModels);
         req.getRequestDispatcher("/admin-resource.jsp").forward(req, resp);
     }
 
@@ -113,17 +113,17 @@ public class AdminResourceServlet extends HttpServlet {
 
         try {
             Integer id = Integer.parseInt(idStr);
-            Resource resource = resourceService.getResourceById(id);
+            ResourceModel resourceModel = resourceService.getResourceById(id);
             
-            if (resource == null) {
+            if (resourceModel == null) {
                 req.setAttribute("error", "资源不存在！");
                 showAllResources(req, resp);
                 return;
             }
 
-            req.setAttribute("editResource", resource);
-            List<Resource> resources = resourceService.getAllResources();
-            req.setAttribute("resources", resources);
+            req.setAttribute("editResource", resourceModel);
+            List<ResourceModel> resourceModels = resourceService.getAllResources();
+            req.setAttribute("resources", resourceModels);
             req.getRequestDispatcher("/admin-resource.jsp").forward(req, resp);
             
         } catch (NumberFormatException e) {
@@ -171,8 +171,8 @@ public class AdminResourceServlet extends HttpServlet {
             String description = req.getParameter("description");
             
             // 获取原资源信息
-            Resource resource = resourceService.getResourceById(id);
-            if (resource == null) {
+            ResourceModel resourceModel = resourceService.getResourceById(id);
+            if (resourceModel == null) {
                 resp.setContentType("text/html;charset=UTF-8");
                 resp.getWriter().println("<script>alert('资源不存在！'); window.location.href='" + 
                     req.getContextPath() + "/admin/resource';</script>");
@@ -180,10 +180,10 @@ public class AdminResourceServlet extends HttpServlet {
             }
 
             // 更新资源信息
-            resource.setTitle(title);
-            resource.setDescription(description);
+            resourceModel.setTitle(title);
+            resourceModel.setDescription(description);
             
-            boolean success = resourceService.updateResource(resource);
+            boolean success = resourceService.updateResource(resourceModel);
             
             if (success) {
                 resp.setContentType("text/html;charset=UTF-8");

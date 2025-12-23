@@ -12,7 +12,6 @@ import java.io.IOException;
 
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
-    private AuthService authService = new AuthService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -58,6 +57,7 @@ public class RegisterServlet extends HttpServlet {
 
         UserModel user = new UserModel(username.trim(), password, "student", email.trim(), null);
         try {
+            AuthService authService = new AuthService();
             authService.registerUser(user);
             req.getSession().setAttribute("successMessage", "注册成功，请登录");
             resp.sendRedirect(req.getContextPath() + "/login");
@@ -67,5 +67,6 @@ public class RegisterServlet extends HttpServlet {
             req.setAttribute("email", email);
             doGet(req, resp);
         }
+        RequestDispatcher dispatcher = req.getRequestDispatcher("/login.jsp");
     }
 }

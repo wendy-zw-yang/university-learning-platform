@@ -6,83 +6,81 @@ import java.util.List;
 /**
  * 教师模型类 - 继承自UserModel，包含教师特定数据
  */
-public class TeacherModel extends UserModel {
-    private String profile;  // 教师简介
-    private String title;    // 教师职称
-    private List<Integer> courseIds;  // 教师关联的课程ID列表
+public class TeacherModel {
+
+    UserModel userModel;
+    private List<CourseModel> courseList;  // 教师关联的课程列表
+
+    private List<Integer> courseIdList;  // 教师关联的课程ID列表
 
     // 构造函数
     public TeacherModel() {
         super();
-        this.courseIds = new ArrayList<>();
+        this.courseList = new ArrayList<>();
+        this.courseIdList=new ArrayList<>();
     }
 
-    public TeacherModel(int id, String username, String password, String role, 
-                       String email, String avatar, String profile, String title) {
-        super(id, username, password, role, email, avatar);
-        this.profile = profile;
-        this.title = title;
-        this.courseIds = new ArrayList<>();
+    public TeacherModel(UserModel userModel){
+
+        this.userModel = userModel;
+        this.courseList = new ArrayList<>();
+        this.courseIdList=new ArrayList<>();
     }
 
-    // Getters and Setters
-    public String getProfile() {
-        return profile;
+    public List<CourseModel> getCourseList() {
+        return courseList;
     }
 
-    public void setProfile(String profile) {
-        this.profile = profile;
+
+    public void setCourseList(List<CourseModel> courseList) {
+        this.courseList = courseList;
     }
 
-    public String getTitle() {
-        return title;
+    public UserModel getUserModel() {
+        return userModel;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setUserModel(UserModel userModel) {
+        this.userModel = userModel;
+    }
+    public List<Integer> getCourseIdList() {
+        return courseIdList;
     }
 
-    public List<Integer> getCourseIds() {
-        return courseIds;
-    }
-
-    public void setCourseIds(List<Integer> courseIds) {
-        this.courseIds = courseIds;
+    public void setCourseIdList(List<Integer> courseIdList) {
+        this.courseIdList = courseIdList;
     }
 
     /**
-     * 添加课程ID到教师的课程列表
-     * @param courseId 课程ID
+     * 添加课程到教师的课程列表
+     * @param course 课程对象
      */
-    public void addCourse(int courseId) {
-        if (this.courseIds == null) {
-            this.courseIds = new ArrayList<>();
+    public void addCourse(CourseModel course) {
+        if (this.courseList == null) {
+            this.courseList = new ArrayList<>();
         }
-        if (!this.courseIds.contains(courseId)) {
-            this.courseIds.add(courseId);
+        if (!this.courseList.contains(course)) {
+            this.courseList.add(course);
         }
     }
 
     /**
-     * 移除课程ID
+     * 移除课程
      * @param courseId 课程ID
      */
     public void removeCourse(int courseId) {
-        if (this.courseIds != null) {
-            this.courseIds.remove(Integer.valueOf(courseId));
+        if (this.courseList != null) {
+            for(CourseModel each : this.courseList)
+                if( each.getId() == courseId)
+                    this.courseList.remove(each);
         }
     }
 
     @Override
     public String toString() {
         return "TeacherModel{" +
-                "id=" + getId() +
-                ", username='" + getUsername() + '\'' +
-                ", role='" + getRole() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", profile='" + profile + '\'' +
-                ", title='" + title + '\'' +
-                ", courseIds=" + courseIds +
+                "userModel=" + userModel +
+                ", courseList=" + courseList +
                 '}';
     }
 }

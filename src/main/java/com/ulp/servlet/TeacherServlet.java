@@ -2,6 +2,7 @@ package com.ulp.servlet;
 
 import com.ulp.bean.TeacherModel;
 import com.ulp.bean.CourseModel;
+import com.ulp.bean.UserModel;
 import com.ulp.service.TeacherService;
 import com.ulp.service.CourseService;
 
@@ -19,7 +20,7 @@ import java.util.List;
  * 教师控制器 - 处理教师相关的HTTP请求
  */
 @WebServlet("/admin/teachers")
-public class TeacherController extends HttpServlet {
+public class TeacherServlet extends HttpServlet {
     
     private TeacherService teacherService;
     private CourseService courseService;
@@ -154,13 +155,15 @@ public class TeacherController extends HttpServlet {
         }
         
         TeacherModel teacher = new TeacherModel();
-        teacher.setUsername(username.trim());
-        teacher.setPassword(password.trim()); // 注意：实际应用中应该加密密码
-        teacher.setRole("teacher");
-        teacher.setEmail(email != null ? email.trim() : "");
-        teacher.setAvatar(avatar != null ? avatar.trim() : "");
-        teacher.setProfile(profile != null ? profile.trim() : "");
-        teacher.setTitle(title != null ? title.trim() : "");
+        UserModel user=new UserModel();
+        user.setUsername(username.trim());
+        user.setPassword(password.trim()); // 注意：实际应用中应该加密密码
+        user.setRole("teacher");
+        user.setEmail(email != null ? email.trim() : "");
+        user.setAvatar(avatar != null ? avatar.trim() : "");
+        user.setProfile(profile != null ? profile.trim() : "");
+        user.setTitle(title != null ? title.trim() : "");
+        teacher.setUserModel(user);
         
         // 处理课程ID列表
         List<Integer> courseIds = new ArrayList<>();
@@ -173,7 +176,7 @@ public class TeacherController extends HttpServlet {
                 }
             }
         }
-        teacher.setCourseIds(courseIds);
+        teacher.setCourseIdList(courseIds);
         
         boolean success = teacherService.addTeacher(teacher);
         
@@ -213,13 +216,16 @@ public class TeacherController extends HttpServlet {
         
         try {
             TeacherModel teacher = new TeacherModel();
-            teacher.setId(Integer.parseInt(idStr));
-            teacher.setUsername(username.trim());
-            teacher.setEmail(email != null ? email.trim() : "");
-            teacher.setAvatar(avatar != null ? avatar.trim() : "");
-            teacher.setProfile(profile != null ? profile.trim() : "");
-            teacher.setTitle(title != null ? title.trim() : "");
-            
+            UserModel user=new UserModel();
+
+            user.setId(Integer.parseInt(idStr));
+            user.setUsername(username.trim());
+            user.setEmail(email != null ? email.trim() : "");
+            user.setAvatar(avatar != null ? avatar.trim() : "");
+            user.setProfile(profile != null ? profile.trim() : "");
+            user.setTitle(title != null ? title.trim() : "");
+            teacher.setUserModel(user);
+
             // 处理课程ID列表
             List<Integer> courseIds = new ArrayList<>();
             if (courseIdsStr != null) {
@@ -231,7 +237,7 @@ public class TeacherController extends HttpServlet {
                     }
                 }
             }
-            teacher.setCourseIds(courseIds);
+            teacher.setCourseIdList(courseIds);
             
             boolean success = teacherService.updateTeacher(teacher);
             

@@ -9,6 +9,9 @@ public class UserModel {
     private String role; // "admin", "student", "teacher"
     private String email;
     private String avatar; // File path or URL
+
+    private String profile;
+    private String title;
     private Timestamp createdAt;
 
     // Constructors
@@ -31,6 +34,21 @@ public class UserModel {
         this.avatar = avatar;
     }
 
+    /**
+     * 用全属性构造user
+     */
+    public UserModel(int id, String username, String password, String role, String email, String avatar, String profile, String title, Timestamp createdAt) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.avatar = avatar;
+        this.profile = profile;
+        this.title = title;
+        this.createdAt = createdAt;
+    }
+
     // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -49,7 +67,22 @@ public class UserModel {
 
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
-    
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
@@ -59,5 +92,18 @@ public class UserModel {
                 password != null && !password.isEmpty() &&
                 role != null && (role.equals("admin") || role.equals("student") || role.equals("teacher")) &&
                 email != null && email.matches("^[\\w-_.+]*[\\w-_.]@([\\w]+[.])+[\\w]+$"); // Basic email regex
+    }
+
+    @Override
+    public String toString() {
+        return "UserModel{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
+                ", email='" + email + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

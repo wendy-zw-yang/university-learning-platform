@@ -1,0 +1,50 @@
+package com.ulp.dao.impl;
+
+import com.ulp.bean.CourseModel;
+import com.ulp.dao.CourseDao;
+import com.ulp.util.DBHelper;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CourseDaoImpl implements CourseDao {
+    public CourseDaoImpl() {
+    }
+
+    @Override
+    public List<CourseModel> getCoursesByTeacherId(int teacherId) {
+        List<CourseModel> courseList = new ArrayList<>();
+        String sql = "select * from courses c " +
+                "inner join teacher_courses tc on c.id = tc.course_id  " +
+                "where tc.teacher_id =?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, teacherId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                courseList.add(extractCourseFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private CourseModel extractCourseFromResultSet(ResultSet rs) throws SQLException{
+        CourseModel course = new CourseModel();
+        course.setId(rs.getInt("id"));
+        course.setName(rs.getString("name"));
+        course.setTeacherId(rs.getInt("teacher_id"));
+        course.setDescription(rs.getString("description"));
+        course.setCollege(rs.getString("college"));
+        course.setVisibility(rs.getString("visibility"));
+        course.setCreatedAt(rs.getTimestamp("created_at"));
+        return course;
+    }
+}

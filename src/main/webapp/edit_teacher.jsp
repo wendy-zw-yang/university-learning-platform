@@ -255,7 +255,7 @@
                 <div class="course-selection">
                     <%
                         if (courses != null && !courses.isEmpty()) {
-                            List<Integer> teacherCourseIds = isEdit ? teacher.getCourseIds() : null;
+                            List<Integer> teacherCourseIds = isEdit ? teacher.getCourseList() : null;
                             for (CourseModel course : courses) {
                                 boolean isChecked = teacherCourseIds != null && teacherCourseIds.contains(course.getId());
                     %>

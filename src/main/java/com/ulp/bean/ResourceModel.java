@@ -2,7 +2,7 @@ package com.ulp.bean;
 
 import java.sql.Timestamp;
 
-public class Resource {
+public class ResourceModel {
     private Integer id;              // 资源ID
     private String title;            // 资源标题
     private String description;      // 资源简介
@@ -12,10 +12,10 @@ public class Resource {
     private Integer downloadCount;   // 下载次数
     private Timestamp createdAt;     // 创建时间
 
-    public Resource() {}
+    public ResourceModel() {}
 
-    public Resource(String title, String description, String filePath,
-                   Integer courseId, Integer uploaderId, Integer downloadCount, Timestamp createdAt) {
+    public ResourceModel(String title, String description, String filePath,
+                         Integer courseId, Integer uploaderId, Integer downloadCount, Timestamp createdAt) {
         this.title = title;
         this.description = description;
         this.filePath = filePath;
