@@ -16,3 +16,7 @@ create table users (
 select * from users;
 DELETE from users
 ```
+
+``` mysql
+
+```
