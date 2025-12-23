@@ -25,15 +25,26 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
+        
+        // 参数验证
+        if (username == null || username.trim().isEmpty() || 
+            password == null || password.trim().isEmpty()) {
+            req.setAttribute("error", "用户名和密码不能为空");
+            doGet(req, resp);
+            return;
+        }
 
-        if (authService.authenticate(username, password)) {
+        // 认证用户
+        UserModel user = authService.authenticate(username.trim(), password);
+        if (user != null) {
             HttpSession session = req.getSession();
-            UserModel user = new UserModel(username, password, "student", "example@email.com", null); // Mock user
             session.setAttribute("user", user);
-            resp.sendRedirect("/dashboard.jsp"); // Assume dashboard exists
+            // 重定向到dashboard servlet，由其根据角色进行分发
+            resp.sendRedirect(req.getContextPath() + "/dashboard");
         } else {
-            req.setAttribute("error", "Invalid credentials");
-            doGet(req, resp); // Forward back to login with error
+            req.setAttribute("error", "用户名或密码错误");
+            req.setAttribute("username", username); // 保留用户名
+            doGet(req, resp);
         }
     }
 }

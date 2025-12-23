@@ -1,23 +1,69 @@
 package com.ulp.service;
 
 import com.ulp.bean.UserModel;
+import com.ulp.Dao.UserDao;
+import com.ulp.Dao.impl.UserDaoImpl;
+import com.ulp.util.PasswordUtil;
 
 public class AuthService {
-    // Simulate database or storage (in-memory for now)
-    // In real scenario, use DAO to interact with DB
+    private UserDao userDao = new UserDaoImpl();
 
-    public boolean authenticate(String username, String password) {
-        // Mock logic: Check against stored users
-        // Example: if username == "test" && password == "pass", return true
-        return "test".equals(username) && "pass".equals(password);
+    /**
+     * 用户认证
+     * @param username 用户名
+     * @param password 原始密码
+     * @return 验证成功返回用户对象，失败返回null
+     */
+    public UserModel authenticate(String username, String password) {
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            return null;
+        }
+        
+        // 从数据库验证
+        return userDao.authenticate(username, password);
     }
 
+    /**
+     * 注册新用户
+     * @param user 用户对象
+     * @throws IllegalArgumentException 如果用户数据无效或用户已存在
+     */
     public void registerUser(UserModel user) {
+        // 验证用户数据
         if (!user.validate()) {
-            throw new IllegalArgumentException("Invalid user data");
+            throw new IllegalArgumentException("用户数据无效");
         }
-        // Mock: Save to DB (print for simulation)
-
-        System.out.println("Registered user: " + user.getUsername());
+        
+        // 检查用户名是否已存在
+        if (userDao.existsByUsername(user.getUsername())) {
+            throw new IllegalArgumentException("用户名已存在");
+        }
+        
+        // 检查邮箱是否已存在
+        if (userDao.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("邮箱已被注册");
+        }
+        
+        // 加密密码
+        user.setPassword(user.getPassword());
+        
+        // 保存到数据库
+        if (!userDao.insertUser(user)) {
+            throw new IllegalArgumentException("注册失败，请稍后重试");
+        }
+    }
+    
+    /**
+     * 检查用户名是否可用
+     */
+    public boolean isUsernameAvailable(String username) {
+        return !userDao.existsByUsername(username);
+    }
+    
+    /**
+     * 检查邮箱是否可用
+     */
+    public boolean isEmailAvailable(String email) {
+        return !userDao.existsByEmail(email);
     }
 }
