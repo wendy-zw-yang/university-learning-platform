@@ -24,14 +24,47 @@ public class RegisterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
+        String confirmPassword = req.getParameter("confirmPassword");
         String email = req.getParameter("email");
+        
+        // 参数验证
+        if (username == null || username.trim().isEmpty() ||
+            password == null || password.isEmpty() ||
+            email == null || email.trim().isEmpty()) {
+            req.setAttribute("error", "所有字段都必须填写");
+            req.setAttribute("username", username);
+            req.setAttribute("email", email);
+            doGet(req, resp);
+            return;
+        }
+        
+        // 验证密码确认
+        if (confirmPassword != null && !password.equals(confirmPassword)) {
+            req.setAttribute("error", "两次输入的密码不一致");
+            req.setAttribute("username", username);
+            req.setAttribute("email", email);
+            doGet(req, resp);
+            return;
+        }
+        
+        // 密码强度验证（至少6位）
+        if (password.length() < 6) {
+            req.setAttribute("error", "密码长度至少为6位");
+            req.setAttribute("username", username);
+            req.setAttribute("email", email);
+            doGet(req, resp);
+            return;
+        }
 
-        UserModel user = new UserModel(username, password, "student", email, null); // Only student
+        UserModel user = new UserModel(username.trim(), password, "student", email.trim(), null);
         try {
             authService.registerUser(user);
-            resp.sendRedirect("login.jsp"); // Redirect to login after success
+            req.getSession().setAttribute("successMessage", "注册成功，请登录");
+            resp.sendRedirect(req.getContextPath() + "/login");
         } catch (IllegalArgumentException e) {
             req.setAttribute("error", e.getMessage());
+            req.setAttribute("username", username);
+            req.setAttribute("email", email);
             doGet(req, resp);
         }
     }
