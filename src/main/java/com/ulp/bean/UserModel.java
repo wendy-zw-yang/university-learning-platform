@@ -1,15 +1,28 @@
 package com.ulp.bean;
 
+import java.sql.Timestamp;
+
 public class UserModel {
+    private int id;
     private String username;
     private String password;
     private String role; // "admin", "student", "teacher"
     private String email;
     private String avatar; // File path or URL
+    private Timestamp createdAt;
 
     // Constructors
     public UserModel() {}
 
+    public UserModel(int id, String username, String password, String role, String email, String avatar) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.avatar = avatar;
+    }
+    
     public UserModel(String username, String password, String role, String email, String avatar) {
         this.username = username;
         this.password = password;
@@ -19,6 +32,9 @@ public class UserModel {
     }
 
     // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
@@ -33,6 +49,9 @@ public class UserModel {
 
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
+    
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
     // Validation method
     public boolean validate() {
