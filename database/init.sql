@@ -19,6 +19,26 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 课程表：存储课程信息
+CREATE TABLE IF NOT EXISTS courses (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '课程ID，主键，自增',
+    name VARCHAR(100) NOT NULL COMMENT '课程名称',
+    description TEXT COMMENT '课程描述',
+    department VARCHAR(100) COMMENT '开课学院',
+    visibility ENUM('class_only', 'all') DEFAULT 'all' COMMENT '可见性：class_only-仅本班, all-全部学生',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='课程表';
+
+-- 教师-课程中间表：处理教师与课程的多对多关系
+CREATE TABLE IF NOT EXISTS teacher_courses (
+    teacher_id INT NOT NULL COMMENT '教师ID',
+    course_id INT NOT NULL COMMENT '课程ID',
+    PRIMARY KEY (teacher_id, course_id),
+    FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='教师-课程关联表';
+
 -- 插入测试数据（密码使用MD5加密）
 -- 测试账号: admin / admin123 (密码的MD5: 0192023a7bbd73250516f069df18b500)
 -- 测试账号: student / student123 (密码的MD5: e56a207acd1e6714735487c547c7c5d0)
@@ -27,4 +47,6 @@ INSERT INTO users (username, password, role, email, avatar) VALUES
 ('student', '123456', 'student', 'student@example.com', NULL),
 ('teacher', '123456', 'teacher', 'teacher@example.com', NULL)
 ON DUPLICATE KEY UPDATE username=username;
+
+
 
