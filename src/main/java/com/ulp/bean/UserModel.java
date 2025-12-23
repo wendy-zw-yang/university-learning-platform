@@ -3,51 +3,26 @@ package com.ulp.bean;
 import java.sql.Timestamp;
 
 public class UserModel {
-    private String id;
+    private int id;
     private String username;
     private String password;
-    private String role="student"; // "admin", "student", "teacher"
+    private String role; // "admin", "student", "teacher"
     private String email;
-    private String avatar; // 头像路径
-    private String profile; // 简介，仅教师用
-    private String title; // 职称，仅教师用
+    private String avatar; // File path or URL
     private Timestamp createdAt;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getProfile() {
-        return profile;
-    }
-
-    public void setProfile(String profile) {
-        this.profile = profile;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
 
     // Constructors
     public UserModel() {}
 
+    public UserModel(int id, String username, String password, String role, String email, String avatar) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.avatar = avatar;
+    }
+    
     public UserModel(String username, String password, String role, String email, String avatar) {
         this.username = username;
         this.password = password;
@@ -57,6 +32,9 @@ public class UserModel {
     }
 
     // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
@@ -71,14 +49,15 @@ public class UserModel {
 
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
+    
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
     // Validation method
     public boolean validate() {
-        boolean valid= username != null && !username.isEmpty() &&
+        return username != null && !username.isEmpty() &&
                 password != null && !password.isEmpty() &&
-                role != null && (role.equals("admin") || role.equals("student") || role.equals("teacher"));
-        if(email!= null && !email.isEmpty())
-            valid = valid && email.matches("^[\\w-_.+]*[\\w-_.]@([\\w]+[.])+[\\w]+$"); // Basic email regex
-        return valid;
+                role != null && (role.equals("admin") || role.equals("student") || role.equals("teacher")) &&
+                email != null && email.matches("^[\\w-_.+]*[\\w-_.]@([\\w]+[.])+[\\w]+$"); // Basic email regex
     }
 }
