@@ -39,6 +39,21 @@ CREATE TABLE IF NOT EXISTS teacher_courses (
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='教师-课程关联表';
 
+
+-- 学习资源表：存储上传的资源
+CREATE TABLE IF NOT EXISTS resources (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '资源ID，主键，自增',
+    title VARCHAR(100) NOT NULL COMMENT '资源标题',
+    description TEXT COMMENT '资源简介',
+    file_path VARCHAR(255) NOT NULL COMMENT '文件路径（e.g., /uploads/resource.pdf）',
+    course_id INT NOT NULL COMMENT '所属课程ID',
+    uploader_id INT NOT NULL COMMENT '上传者ID',
+    download_count INT DEFAULT 0 COMMENT '下载次数',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (uploader_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学习资源表';
+
 -- 插入测试数据（密码使用MD5加密）
 -- 测试账号: admin / admin123 (密码的MD5: 0192023a7bbd73250516f069df18b500)
 -- 测试账号: student / student123 (密码的MD5: e56a207acd1e6714735487c547c7c5d0)

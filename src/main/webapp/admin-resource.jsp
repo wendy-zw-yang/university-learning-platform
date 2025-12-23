@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:if test="${empty sessionScope.user or sessionScope.user.role ne 'admin'}">
     <c:redirect url="${pageContext.request.contextPath}/login"/>
 </c:if>
@@ -304,7 +304,7 @@
                                                 <a href="${pageContext.request.contextPath}/admin/resource?action=edit&id=${resource.id}" 
                                                    class="btn btn-edit">编辑</a>
                                                 <a href="javascript:void(0);" 
-                                                   onclick="confirmDelete(${resource.id})" 
+                                                   onclick="confirmDelete(${resource.id});"
                                                    class="btn btn-delete">删除</a>
                                             </td>
                                         </tr>
