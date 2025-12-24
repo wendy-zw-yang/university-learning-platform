@@ -157,11 +157,16 @@
                 <h3>回答学生问题</h3>
             </div>
             
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToCourses()">
                 <div class="icon">✅</div>
                 <h3>学科权限设置</h3>
             </div>
         </div>
     </div>
 </body>
+<script>
+    function goToCourses() {
+        window.location.href='${pageContext.request.contextPath}/teacher/courses';
+    }
+</script>
 </html>
