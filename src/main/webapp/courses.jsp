@@ -161,7 +161,25 @@
     <script>
         function confirmDelete(id, name) {
             if (confirm('确定要删除课程"' + name + '"吗？此操作不可恢复！')) {
-                window.location.href = '${pageContext.request.contextPath}/admin/courses?action=delete&id=' + id;
+                // 使用POST方式删除
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '${pageContext.request.contextPath}/admin/courses';
+
+                var actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'delete';
+                form.appendChild(actionInput);
+
+                var idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                form.appendChild(idInput);
+
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     </script>
@@ -197,7 +215,7 @@
         
         <div class="actions">
             <a href="${pageContext.request.contextPath}/admin/courses?action=add" class="btn btn-primary">+ 添加新课程</a>
-            <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn btn-secondary">返回首页</a>
+            <a href="${pageContext.request.contextPath}/admin-homepage.jsp" class="btn btn-secondary">返回首页</a>
         </div>
         
         <%
@@ -250,9 +268,6 @@
         <% } else { %>
             <div class="no-data">
                 <p>暂无课程数据</p>
-                <p style="margin-top: 10px;">
-                    <a href="${pageContext.request.contextPath}/admin/courses?action=add" class="btn btn-primary">立即添加</a>
-                </p>
             </div>
         <% } %>
     </div>

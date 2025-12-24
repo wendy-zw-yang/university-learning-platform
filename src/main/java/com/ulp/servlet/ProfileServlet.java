@@ -25,6 +25,11 @@ public class ProfileServlet extends HttpServlet {
             resp.sendRedirect("/login");
             return;
         }
+        String action = req.getParameter("action");
+        if ("back".equals(action)) {
+            resp.sendRedirect(req.getContextPath() + "/dashboard");
+            return;
+        }
         UserModel user = (UserModel) session.getAttribute("user");
         req.setAttribute("user", user);
         RequestDispatcher dispatcher = req.getRequestDispatcher("/profile.jsp");

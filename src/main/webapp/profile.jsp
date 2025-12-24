@@ -124,6 +124,7 @@
 
 <!-- 安全退出链接 -->
 <div style="margin-top: 20px;">
+    <a href="profile?action=back" style="color: #007bff; margin-right: 15px;">返回首页</a>
     <a href="logout" style="color: #dc3545;">退出登录</a>
 </div>
 </body>
