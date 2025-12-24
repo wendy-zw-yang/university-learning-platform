@@ -187,7 +187,7 @@
         <form method="post" action="${pageContext.request.contextPath}/admin/teachers">
             <% if (isEdit) { %>
                 <input type="hidden" name="action" value="update">
-                <input type="hidden" name="id" value="<%= teacher.getId() %>">
+                <input type="hidden" name="id" value="<%= teacher.getUserModel().getId() %>">
             <% } else { %>
                 <input type="hidden" name="action" value="add">
             <% } %>
@@ -197,7 +197,7 @@
                 <input type="text" 
                        id="username" 
                        name="username" 
-                       value="<%= isEdit ? teacher.getUsername() : "" %>" 
+                       value="<%= isEdit ? teacher.getUserModel().getUsername() : "" %>"
                        required 
                        placeholder="请输入用户名">
                 <div class="help-text">教师登录系统使用的用户名</div>
@@ -220,7 +220,7 @@
                 <input type="email" 
                        id="email" 
                        name="email" 
-                       value="<%= isEdit && teacher.getEmail() != null ? teacher.getEmail() : "" %>" 
+                       value="<%= isEdit && teacher.getUserModel().getEmail() != null ? teacher.getUserModel().getEmail() : "" %>"
                        placeholder="请输入邮箱地址">
             </div>
             
@@ -229,7 +229,7 @@
                 <input type="text" 
                        id="title" 
                        name="title" 
-                       value="<%= isEdit && teacher.getTitle() != null ? teacher.getTitle() : "" %>" 
+                       value="<%= isEdit && teacher.getUserModel().getTitle() != null ? teacher.getUserModel().getTitle() : "" %>"
                        placeholder="例如：教授、副教授、讲师等">
             </div>
             
@@ -237,7 +237,7 @@
                 <label for="profile">个人简介</label>
                 <textarea id="profile" 
                           name="profile" 
-                          placeholder="请输入教师的个人简介、研究方向等"><%= isEdit && teacher.getProfile() != null ? teacher.getProfile() : "" %></textarea>
+                          placeholder="请输入教师的个人简介、研究方向等"><%= isEdit && teacher.getUserModel().getProfile() != null ? teacher.getUserModel().getProfile() : "" %></textarea>
             </div>
             
             <div class="form-group">
@@ -245,7 +245,7 @@
                 <input type="text" 
                        id="avatar" 
                        name="avatar" 
-                       value="<%= isEdit && teacher.getAvatar() != null ? teacher.getAvatar() : "" %>" 
+                       value="<%= isEdit && teacher.getUserModel().getAvatar() != null ? teacher.getUserModel().getAvatar() : "" %>"
                        placeholder="请输入头像图片的URL地址">
                 <div class="help-text">头像图片的网络地址或服务器路径</div>
             </div>
@@ -255,7 +255,7 @@
                 <div class="course-selection">
                     <%
                         if (courses != null && !courses.isEmpty()) {
-                            List<Integer> teacherCourseIds = isEdit ? teacher.getCourseList() : null;
+                            List<Integer> teacherCourseIds = isEdit ? teacher.getCourseIdList() : null;
                             for (CourseModel course : courses) {
                                 boolean isChecked = teacherCourseIds != null && teacherCourseIds.contains(course.getId());
                     %>

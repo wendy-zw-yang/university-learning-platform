@@ -214,7 +214,7 @@
         
         <div class="actions">
             <a href="${pageContext.request.contextPath}/admin/teachers?action=add" class="btn btn-primary">+ 添加新教师</a>
-            <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn btn-secondary">返回首页</a>
+            <a href="${pageContext.request.contextPath}/admin-homepage.jsp" class="btn btn-secondary">返回首页</a>
         </div>
         
         <%
@@ -270,9 +270,6 @@
         <% } else { %>
             <div class="no-data">
                 <p>暂无教师数据</p>
-                <p style="margin-top: 10px;">
-                    <a href="${pageContext.request.contextPath}/admin/teachers?action=add" class="btn btn-primary">立即添加</a>
-                </p>
             </div>
         <% } %>
     </div>
