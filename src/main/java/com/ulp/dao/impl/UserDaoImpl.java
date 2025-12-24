@@ -47,7 +47,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean insertUser(UserModel user) {
-        String sql = "INSERT INTO users (username, password, role, email, avatar, profile,title) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (username, password, role, email, avatar, profile,title) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
@@ -133,9 +133,9 @@ public class UserDaoImpl implements UserDao {
             pstmt.setString(3, user.getRole());
             pstmt.setString(4, user.getEmail());
             pstmt.setString(5, user.getAvatar());
-            pstmt.setInt(6, user.getId());
-            pstmt.setString(7, user.getProfile());
-            pstmt.setString(8, user.getTitle());
+            pstmt.setString(6, user.getProfile());
+            pstmt.setString(7, user.getTitle());
+            pstmt.setInt(8, user.getId());
 
             int rows = pstmt.executeUpdate();
             System.out.println("Update record number " + rows);
