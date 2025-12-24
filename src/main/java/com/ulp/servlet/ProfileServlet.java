@@ -41,18 +41,22 @@ public class ProfileServlet extends HttpServlet {
         UserModel user = (UserModel) session.getAttribute("user");
 
         String newPassword = req.getParameter("newPassword");
+        if (newPassword != null && !newPassword.isEmpty()) {
+            user.setPassword(newPassword);
+        }
         String email = req.getParameter("email");
         user.setEmail(email);
 
-        Part avatarPart = req.getPart("avatar");
-        if (avatarPart != null && avatarPart.getSize() > 0) {
-            String avatarPath = profileService.uploadAvatar(avatarPart, user.getUsername());
-            user.setAvatar(avatarPath);
-        }
+//        Part avatarPart = req.getPart("avatar");
+//        if (avatarPart != null && avatarPart.getSize() > 0) {
+//            String avatarPath = profileService.uploadAvatar(avatarPart, user.getUsername());
+//            user.setAvatar(avatarPath);
+//        }
 
         profileService.updateProfile(user, newPassword);
         session.setAttribute("user", user); // Update session
         req.setAttribute("success", "Profile updated");
-        doGet(req, resp); // Forward back with success
+        // 重定向到dashboard servlet，由其根据角色进行分发
+        resp.sendRedirect(req.getContextPath() + "/dashboard");
     }
 }

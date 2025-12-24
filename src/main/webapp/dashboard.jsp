@@ -4,12 +4,14 @@
 <html>
 <head>
     <title>Dashboard</title>
+    <style>
+        h1 {
+            text-align: center;
+            margin-top: 40%;
+        }
+    </style>
 </head>
 <body>
-<h2>Welcome, ${user.username}!</h2>
-<p>Role: ${user.role}</p>
-<a href="profile">Edit Profile</a><br>
-<!-- Add links to other modules as needed -->
-<a href="logout">Logout</a> <!-- Assume a LogoutServlet exists -->
+<h1>页面等待跳转...</h1>
 </body>
 </html>
