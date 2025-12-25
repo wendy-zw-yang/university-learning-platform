@@ -125,6 +125,7 @@
 <!-- 安全退出链接 -->
 <div style="margin-top: 20px;">
     <a href="logout" style="color: #dc3545;">退出登录</a>
+<%--    <a href="delete" style="color: #dc3545;">删除账户</a>--%>
 </div>
 </body>
 </html>

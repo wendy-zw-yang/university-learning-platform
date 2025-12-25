@@ -47,7 +47,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean insertUser(UserModel user) {
-        String sql = "INSERT INTO users (username, password, role, email, avatar, profile,title) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (username, password, role, email, avatar, profile,title) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
