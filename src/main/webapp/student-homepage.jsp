@@ -131,16 +131,21 @@
         </div>
 
         <div class="dashboard-grid">
+            <div class="dashboard-card" onclick="goToCourses()">
+                <div class="icon">🎓</div>
+                <h3>课程管理</h3>
+            </div>
+
             <div class="dashboard-card">
                 <div class="icon">📚</div>
                 <h3>学习资源</h3>
             </div>
-            
+
             <div class="dashboard-card">
                 <div class="icon">📝</div>
                 <h3>问答讨论</h3>
             </div>
-            
+
             <div class="dashboard-card">
                 <div class="icon">📊</div>
                 <h3>管理个人资源</h3>
@@ -148,4 +153,9 @@
         </div>
     </div>
 </body>
+<script>
+    function goToCourses() {
+        window.location.href = "${pageContext.request.contextPath}/student/courses";
+    }
+</script>
 </html>

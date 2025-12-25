@@ -144,12 +144,12 @@
         </div>
         
         <div class="dashboard-grid">
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToTeachers()">
                 <div class="icon">👥</div>
                 <h3>教师管理</h3>
             </div>
             
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToCourses()">
                 <div class="icon">📚</div>
                 <h3>课程管理</h3>
             </div>
@@ -169,6 +169,16 @@
 <script>
     function goToResource() {
         window.location.href = "<%= request.getContextPath() %>/admin/resource";
+    }
+</script>
+<script>
+    function goToTeachers() {
+        window.location.href='${pageContext.request.contextPath}/admin/teachers';
+    }
+</script>
+<script>
+    function goToCourses() {
+        window.location.href='${pageContext.request.contextPath}/admin/courses';
     }
 </script>
 </html>

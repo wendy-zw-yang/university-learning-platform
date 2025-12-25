@@ -88,4 +88,13 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通知表';
+
+-- 学生-课程中间表：处理学生与课程的多对多关系
+CREATE TABLE IF NOT EXISTS student_courses (
+    student_id INT NOT NULL COMMENT '学生ID',
+    course_id INT NOT NULL COMMENT '课程ID',
+    PRIMARY KEY (student_id, course_id),
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学生-课程关联表';
 ```

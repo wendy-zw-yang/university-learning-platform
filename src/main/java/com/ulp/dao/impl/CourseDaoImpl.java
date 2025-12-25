@@ -18,9 +18,7 @@ public class CourseDaoImpl implements CourseDao {
     @Override
     public List<CourseModel> getCoursesByTeacherId(int teacherId) {
         List<CourseModel> courseList = new ArrayList<>();
-        String sql = "select * from courses c " +
-                "inner join teacher_courses tc on c.id = tc.course_id  " +
-                "where tc.teacher_id =?";
+        String sql = "SELECT * FROM courses WHERE teacher_id = ?";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -33,7 +31,7 @@ public class CourseDaoImpl implements CourseDao {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return courseList;
     }
 
     private CourseModel extractCourseFromResultSet(ResultSet rs) throws SQLException{

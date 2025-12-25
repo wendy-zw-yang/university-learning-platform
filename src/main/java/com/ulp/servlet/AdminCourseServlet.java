@@ -16,7 +16,7 @@ import java.util.List;
  * 课程控制器 - 处理课程相关的HTTP请求
  */
 @WebServlet("/admin/courses")
-public class CourseServlet extends HttpServlet {
+public class AdminCourseServlet extends HttpServlet {
     
     private CourseService courseService;
 
