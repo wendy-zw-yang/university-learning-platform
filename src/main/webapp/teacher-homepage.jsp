@@ -147,7 +147,7 @@
             <h2 class="content">您所上课程有 条未回答问题</h2>
         </div>
         <div class="dashboard-grid">
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToUploadResource()">
                 <div class="icon">📚</div>
                 <h3>发布学习资源</h3>
             </div>
@@ -167,6 +167,9 @@
 <script>
     function goToCourses() {
         window.location.href='${pageContext.request.contextPath}/teacher/courses';
+    }
+    function goToUploadResource() {
+        window.location.href='${pageContext.request.contextPath}/teacher/resource';
     }
 </script>
 </html>
