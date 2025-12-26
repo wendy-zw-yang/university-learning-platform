@@ -136,7 +136,7 @@
                 <h3>课程管理</h3>
             </div>
 
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToResources()">
                 <div class="icon">📚</div>
                 <h3>学习资源</h3>
             </div>
@@ -156,6 +156,9 @@
 <script>
     function goToCourses() {
         window.location.href = "${pageContext.request.contextPath}/student/courses";
+    }
+    function goToResources() {
+        window.location.href = "${pageContext.request.contextPath}/student/resource";
     }
 </script>
 </html>

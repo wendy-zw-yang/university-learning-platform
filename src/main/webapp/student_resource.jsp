@@ -1,13 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.ulp.bean.ResourceModel" %>
 <%@ page import="com.ulp.bean.CourseModel" %>
+<%@ page import="com.ulp.service.UserService" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.sql.Timestamp" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%
-    // 验证用户是否登录且为管理员
+    // 验证用户是否登录且为学生
     Object userObj = session.getAttribute("user");
-    if (userObj == null || !"admin".equals(userObj.getClass().getMethod("getRole").invoke(userObj))) {
+    if (userObj == null || !"student".equals(userObj.getClass().getMethod("getRole").invoke(userObj))) {
         response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
@@ -15,21 +16,20 @@
     // 获取课程列表和资源列表
     List<CourseModel> courses = (List<CourseModel>) request.getAttribute("courses");
     List<ResourceModel> allResources = (List<ResourceModel>) request.getAttribute("resources");
+    Integer selectedCourseId = (Integer) request.getAttribute("selectedCourseId");
 
-    // 获取当前选中的课程ID
-    String courseIdParam = request.getParameter("courseId");
-    Integer selectedCourseId = null;
-    if (courseIdParam != null && !courseIdParam.isEmpty()) {
-        try {
-            selectedCourseId = Integer.parseInt(courseIdParam);
-        } catch (NumberFormatException e) {
-            // 如果参数无效，忽略
-        }
+    // 获取搜索参数
+    String searchQuery = request.getParameter("search");
+    if (searchQuery == null) {
+        searchQuery = "";
     }
 
     // 获取错误信息
     String errorMessage = (String) request.getAttribute("error");
     String successMessage = (String) request.getAttribute("success");
+
+    // 创建UserService实例
+    UserService userService = new UserService();
 
     // 格式化日期的工具
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -39,7 +39,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学习资源管理 - 管理员</title>
+    <title>学习资源管理 - 学生</title>
     <style>
         * {
             margin: 0;
@@ -85,28 +85,22 @@
             transition: all 0.3s;
         }
 
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
         .btn-secondary {
             background-color: #6c757d;
             color: white;
         }
+
         .btn-secondary:hover {
             background-color: #5a6268;
-        }
-
-        /* 新增：编辑和删除按钮颜色样式 */
-        .btn-edit {
-            background-color: #ffc107;
-            color: #212529;
-        }
-        .btn-edit:hover {
-            background-color: #e0a800;
-        }
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-delete:hover {
-            background-color: #c82333;
         }
 
         .message {
@@ -127,6 +121,33 @@
             border: 1px solid #f5c6cb;
         }
 
+        .search-container {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .search-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-btn:hover {
+            background-color: #0056b3;
+        }
+
         .course-list {
             margin-bottom: 30px;
         }
@@ -137,6 +158,9 @@
             margin-bottom: 10px;
             border-radius: 4px;
             border-left: 4px solid #007bff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .course-item:hover {
@@ -152,6 +176,7 @@
             text-decoration: none;
             color: #333;
             display: block;
+            flex: 1;
         }
 
         .course-link:hover {
@@ -195,11 +220,6 @@
             background-color: #f8f9fa;
         }
 
-        .actions-cell {
-            display: flex;
-            gap: 10px;
-        }
-
         .no-data {
             text-align: center;
             padding: 40px;
@@ -221,8 +241,23 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>📝 学习资源管理</h1>
-        <a href="${pageContext.request.contextPath}/admin-homepage.jsp" class="btn btn-secondary">返回首页</a>
+        <h1>📚 学习资源管理</h1>
+        <a href="${pageContext.request.contextPath}/student-homepage.jsp" class="btn btn-secondary">返回首页</a>
+    </div>
+
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <form method="get" action="${pageContext.request.contextPath}/student/resource" style="display: flex; width: 100%; gap: 10px;">
+            <input type="text"
+                   name="search"
+                   class="search-input"
+                   placeholder="搜索资源名称..."
+                   value="<%= searchQuery != null ? searchQuery : "" %>">
+            <button type="submit" class="search-btn">搜索</button>
+            <% if (searchQuery != null && !searchQuery.isEmpty()) { %>
+            <a href="${pageContext.request.contextPath}/student/resource" class="btn btn-secondary">清除搜索</a>
+            <% } %>
+        </form>
     </div>
 
     <%-- 显示消息 --%>
@@ -234,6 +269,74 @@
     <div class="message success"><%= successMessage %></div>
     <% } %>
 
+    <!-- 搜索结果或课程列表 -->
+    <% if (searchQuery != null && !searchQuery.isEmpty()) { %>
+    <!-- 搜索结果 -->
+    <h2>搜索结果</h2>
+
+    <%
+        // 根据搜索词筛选资源
+        List<ResourceModel> searchResults = new java.util.ArrayList<>();
+        if (allResources != null) {
+            for (ResourceModel resource : allResources) {
+                if (resource.getTitle().toLowerCase().contains(searchQuery.toLowerCase())) {
+                    searchResults.add(resource);
+                }
+            }
+        }
+    %>
+
+    <% if (searchResults != null && !searchResults.isEmpty()) { %>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>资源名称</th>
+            <th>课程</th>
+            <th>上传者</th>
+            <th>下载次数</th>
+            <th>创建时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% for (ResourceModel resource : searchResults) {
+            String uploaderName = userService.getUsernameById(resource.getUploaderId());
+            CourseModel resourceCourse = null;
+            if (courses != null) {
+                for (CourseModel course : courses) {
+                    if (course.getId() == resource.getCourseId().intValue()) {
+                        resourceCourse = course;
+                        break;
+                    }
+                }
+            }
+        %>
+        <tr>
+            <td><%= resource.getId() %></td>
+            <td>
+                <a href="${pageContext.request.contextPath}/student/resource/preview?id=<%= resource.getId() %>"
+                   style="color: #007bff; text-decoration: none;">
+                    <%= resource.getTitle() %>
+                    <span class="file-extension">
+                            <%= resource.getFilePath().substring(resource.getFilePath().lastIndexOf('.') + 1).toUpperCase() %>
+                        </span>
+                </a>
+            </td>
+            <td><%= resourceCourse != null ? resourceCourse.getName() : "未知课程" %></td>
+            <td><%= uploaderName != null ? uploaderName : "未知用户" %></td>
+            <td><%= resource.getDownloadCount() %></td>
+            <td><%= resource.getCreatedAt() != null ? dateFormat.format(resource.getCreatedAt()) : "-" %></td>
+        </tr>
+        <% } %>
+        </tbody>
+    </table>
+    <% } else { %>
+    <div class="no-data">
+        <p>未找到匹配的资源</p>
+    </div>
+    <% } %>
+    <% } else { %>
+    <!-- 原有的课程列表和资源列表 -->
     <div class="course-list">
         <h2>课程列表</h2>
         <% if (courses != null && !courses.isEmpty()) { %>
@@ -249,7 +352,7 @@
             }
         %>
         <div class="course-item <%= selectedCourseId != null && selectedCourseId.equals(course.getId()) ? "active" : "" %>">
-            <a href="${pageContext.request.contextPath}/admin/resource?courseId=<%= course.getId() %>" class="course-link">
+            <a href="${pageContext.request.contextPath}/student/resource?courseId=<%= course.getId() %>" class="course-link">
                 <div class="course-header">
                     <div>
                         <strong><%= course.getName() %></strong>
@@ -260,6 +363,7 @@
                     </div>
                 </div>
             </a>
+            <a href="${pageContext.request.contextPath}/student/edit_resources?courseId=<%= course.getId() %>" class="btn btn-primary">上传资源</a>
         </div>
         <% } %>
         <% } else { %>
@@ -294,33 +398,26 @@
             <th>上传者</th>
             <th>下载次数</th>
             <th>创建时间</th>
-            <th>操作</th>
         </tr>
         </thead>
         <tbody>
-        <% for (ResourceModel resource : courseResources) { %>
+        <% for (ResourceModel resource : courseResources) {
+            String uploaderName = userService.getUsernameById(resource.getUploaderId());
+        %>
         <tr>
             <td><%= resource.getId() %></td>
             <td>
-                <a href="${pageContext.request.contextPath}/admin/resource/preview?id=<%= resource.getId() %>"
+                <a href="${pageContext.request.contextPath}/student/resource/preview?id=<%= resource.getId() %>"
                    style="color: #007bff; text-decoration: none;">
                     <%= resource.getTitle() %>
                     <span class="file-extension">
-                        <%= resource.getFilePath().substring(resource.getFilePath().lastIndexOf('.') + 1).toUpperCase() %>
-                    </span>
+                            <%= resource.getFilePath().substring(resource.getFilePath().lastIndexOf('.') + 1).toUpperCase() %>
+                        </span>
                 </a>
             </td>
-            <td><%= resource.getUploaderId() %></td>
+            <td><%= uploaderName != null ? uploaderName : "未知用户" %></td>
             <td><%= resource.getDownloadCount() %></td>
             <td><%= resource.getCreatedAt() != null ? dateFormat.format(resource.getCreatedAt()) : "-" %></td>
-            <td>
-                <div class="actions-cell">
-                    <a href="${pageContext.request.contextPath}/admin/resource?action=edit&id=<%= resource.getId() %>&courseId=<%= selectedCourseId %>"
-                       class="btn btn-edit">编辑</a>
-                    <button onclick="confirmDelete(<%= resource.getId() %>, '<%= resource.getTitle() %>')"
-                            class="btn btn-delete">删除</button>
-                </div>
-            </td>
         </tr>
         <% } %>
         </tbody>
@@ -331,32 +428,7 @@
     </div>
     <% } %>
     <% } %>
+    <% } %>
 </div>
-
-<script>
-    function confirmDelete(id, title) {
-        if (confirm('确定要删除资源 "' + title + '" 吗？此操作不可恢复！')) {
-            // 使用POST方式删除
-            var form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '${pageContext.request.contextPath}/admin/resource';
-
-            var actionInput = document.createElement('input');
-            actionInput.type = 'hidden';
-            actionInput.name = 'action';
-            actionInput.value = 'delete';
-            form.appendChild(actionInput);
-
-            var idInput = document.createElement('input');
-            idInput.type = 'hidden';
-            idInput.name = 'id';
-            idInput.value = id;
-            form.appendChild(idInput);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-</script>
 </body>
 </html>
