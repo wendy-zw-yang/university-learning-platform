@@ -215,7 +215,7 @@
         
         <div class="actions">
             <a href="${pageContext.request.contextPath}/admin/courses?action=add" class="btn btn-primary">+ 添加新课程</a>
-            <a href="${pageContext.request.contextPath}/admin-homepage.jsp" class="btn btn-secondary">返回首页</a>
+            <a href="${pageContext.request.contextPath}/jsp/admin/admin-homepage.jsp" class="btn btn-secondary">返回首页</a>
         </div>
         
         <%

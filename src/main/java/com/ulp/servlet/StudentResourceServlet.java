@@ -135,7 +135,7 @@ public class StudentResourceServlet extends HttpServlet {
         if ("upload".equals(action)) {
             handleUploadResource(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/student-homepage.jsp");
+            response.sendRedirect(request.getContextPath() + "/student_homepage.jsp");
         }
     }
 

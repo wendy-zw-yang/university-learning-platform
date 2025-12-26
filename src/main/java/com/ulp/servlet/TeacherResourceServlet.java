@@ -99,7 +99,7 @@ public class TeacherResourceServlet extends HttpServlet {
         if ("upload".equals(action)) {
             handleUploadResource(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/teacher-homepage.jsp");
+            response.sendRedirect(request.getContextPath() + "/teacher_homepage.jsp");
         }
     }
 

@@ -28,13 +28,13 @@ public class HomepageServlet extends HttpServlet {
         // 根据用户角色重定向到相应的主页
         switch (role.toLowerCase()) {
             case "admin":
-                resp.sendRedirect(req.getContextPath() + "/admin-homepage.jsp");
+                resp.sendRedirect(req.getContextPath() + "/admin_homepage.jsp");
                 break;
             case "teacher":
-                resp.sendRedirect(req.getContextPath() + "/teacher-homepage.jsp");
+                resp.sendRedirect(req.getContextPath() + "/teacher_homepage.jsp");
                 break;
             case "student":
-                resp.sendRedirect(req.getContextPath() + "/student-homepage.jsp");
+                resp.sendRedirect(req.getContextPath() + "/student_homepage.jsp");
                 break;
             default:
                 // 如果角色未知，返回错误页面或登录页面

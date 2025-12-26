@@ -152,7 +152,7 @@
 <div class="container">
     <div class="header">
         <h1>📚 课程资源管理</h1>
-        <a href="${pageContext.request.contextPath}/teacher-homepage.jsp" class="btn btn-secondary">返回首页</a>
+        <a href="${pageContext.request.contextPath}/jsp/teacher/teacher-homepage.jsphomepage.jsp" class="btn btn-secondary">返回首页</a>
     </div>
 
     <%-- 显示消息 --%>

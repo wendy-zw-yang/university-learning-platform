@@ -13,12 +13,12 @@ import java.io.IOException;
  * 拦截需要登录才能访问的页面
  */
 @WebFilter(urlPatterns = {
-    "/admin-homepage.jsp",
-    "/teacher-homepage.jsp",
-    "/student-homepage.jsp",
+    "/admin_homepage.jsp",
+    "/teacher_homepage.jsp",
+    "/student_homepage.jsp",
     "/dashboard",
     "/profile",
-    "/admin-resource.jsp"
+    "/admin_resource.jsp"
 })
 public class AuthenticationFilter implements Filter {
     

@@ -222,7 +222,7 @@
 <div class="container">
     <div class="header">
         <h1>📝 学习资源管理</h1>
-        <a href="${pageContext.request.contextPath}/admin-homepage.jsp" class="btn btn-secondary">返回首页</a>
+        <a href="${pageContext.request.contextPath}/jsp/admin/admin-homepage.jsp" class="btn btn-secondary">返回首页</a>
     </div>
 
     <%-- 显示消息 --%>

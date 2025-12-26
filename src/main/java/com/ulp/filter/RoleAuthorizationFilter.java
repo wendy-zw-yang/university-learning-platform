@@ -13,9 +13,9 @@ import java.io.IOException;
  * 确保用户只能访问与其角色匹配的页面
  */
 @WebFilter(urlPatterns = {
-    "/admin-homepage.jsp",
-    "/teacher-homepage.jsp",
-    "/student-homepage.jsp"
+    "/admin_homepage.jsp",
+    "/teacher_homepage.jsp",
+    "/student_homepage.jsp"
 })
 public class RoleAuthorizationFilter implements Filter {
     
@@ -40,11 +40,11 @@ public class RoleAuthorizationFilter implements Filter {
             // 检查用户角色是否与请求的页面匹配
             boolean authorized = false;
             
-            if (requestURI.endsWith("admin-homepage.jsp") && "admin".equals(role)) {
+            if (requestURI.endsWith("admin_homepage.jsp") && "admin".equals(role)) {
                 authorized = true;
-            } else if (requestURI.endsWith("teacher-homepage.jsp") && "teacher".equals(role)) {
+            } else if (requestURI.endsWith("teacher_homepage.jsp") && "teacher".equals(role)) {
                 authorized = true;
-            } else if (requestURI.endsWith("student-homepage.jsp") && "student".equals(role)) {
+            } else if (requestURI.endsWith("student_homepage.jsp") && "student".equals(role)) {
                 authorized = true;
             }
             

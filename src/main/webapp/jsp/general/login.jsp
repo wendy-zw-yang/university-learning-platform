@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户注册 - 大学学习平台</title>
+    <title>用户登录 - 大学学习平台</title>
     <style>
         * {
             margin: 0;
@@ -12,32 +12,24 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: rgba(226, 226, 226);
+            background: rgb(226, 226, 226);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
         .container {
             background: white;
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 450px;
+            width: 400px;
             max-width: 90%;
         }
         h2 {
             text-align: center;
             color: #333;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 14px;
+            margin-bottom: 30px;
         }
         .message {
             padding: 10px;
@@ -50,6 +42,11 @@
             color: #c33;
             border: 1px solid #fcc;
         }
+        .success {
+            background-color: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
         .form-group {
             margin-bottom: 20px;
         }
@@ -60,8 +57,7 @@
             font-weight: 500;
         }
         input[type="text"],
-        input[type="password"],
-        input[type="email"] {
+        input[type="password"] {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -70,20 +66,14 @@
             transition: border-color 0.3s;
         }
         input[type="text"]:focus,
-        input[type="password"]:focus,
-        input[type="email"]:focus {
+        input[type="password"]:focus {
             outline: none;
             border-color: #38990b;
-        }
-        .password-hint {
-            font-size: 12px;
-            color: #888;
-            margin-top: 3px;
         }
         .btn {
             width: 100%;
             padding: 12px;
-            background: #38990b;
+            background:#38990b;
             color: white;
             border: none;
             border-radius: 5px;
@@ -109,66 +99,41 @@
             text-decoration: underline;
         }
     </style>
-    <script>
-        function validateForm() {
-            var password = document.getElementById('password').value;
-            var confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password.length < 6) {
-                alert('密码长度至少为6位');
-                return false;
-            }
-            
-            if (password !== confirmPassword) {
-                alert('两次输入的密码不一致');
-                return false;
-            }
-            
-            return true;
-        }
-    </script>
 </head>
 <body>
     <div class="container">
-        <h2>用户注册</h2>
-        <p class="subtitle">注册为学生账户</p>
+        <h2>用户登录</h2>
         
         <% if (request.getAttribute("error") != null) { %>
             <div class="message error"><%= request.getAttribute("error") %></div>
         <% } %>
         
-        <form action="<%= request.getContextPath() %>/register" method="post" onsubmit="return validateForm()">
+        <% 
+            String successMessage = (String) session.getAttribute("successMessage");
+            if (successMessage != null) { 
+                session.removeAttribute("successMessage");
+        %>
+            <div class="message success"><%= successMessage %></div>
+        <% } %>
+        
+        <form action="<%= request.getContextPath() %>/login" method="post">
             <div class="form-group">
                 <label for="username">用户名</label>
                 <input type="text" id="username" name="username" 
                        value="<%= request.getAttribute("username") != null ? request.getAttribute("username") : "" %>"
-                       required autofocus minlength="3" maxlength="20">
-                <div class="password-hint">3-20个字符</div>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">邮箱</label>
-                <input type="email" id="email" name="email" 
-                       value="<%= request.getAttribute("email") != null ? request.getAttribute("email") : "" %>"
-                       required>
+                       required autofocus>
             </div>
             
             <div class="form-group">
                 <label for="password">密码</label>
-                <input type="password" id="password" name="password" required minlength="6">
-                <div class="password-hint">至少6位字符</div>
+                <input type="password" id="password" name="password" required>
             </div>
             
-            <div class="form-group">
-                <label for="confirmPassword">确认密码</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
-            </div>
-            
-            <button type="submit" class="btn">注册</button>
+            <button type="submit" class="btn">登录</button>
         </form>
         
         <div class="footer-text">
-            已有账号？ <a href="<%= request.getContextPath() %>/login.jsp">立即登录</a>
+            还没有账号？ <a href="<%= request.getContextPath() %>/jsp/general/register.jspregister.jsp">立即注册</a>
         </div>
     </div>
 </body>

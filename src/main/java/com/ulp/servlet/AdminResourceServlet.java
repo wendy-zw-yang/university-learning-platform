@@ -77,7 +77,7 @@ public class AdminResourceServlet extends HttpServlet {
         request.setAttribute("resources", resources);
         request.setAttribute("courses", courses);
 
-        request.getRequestDispatcher("/admin-resource.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin_resource.jsp").forward(request, response);
     }
 
     @Override

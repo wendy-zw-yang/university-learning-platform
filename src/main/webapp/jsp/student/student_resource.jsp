@@ -242,7 +242,7 @@
 <div class="container">
     <div class="header">
         <h1>📚 学习资源管理</h1>
-        <a href="${pageContext.request.contextPath}/student-homepage.jsp" class="btn btn-secondary">返回首页</a>
+        <a href="${pageContext.request.contextPath}/student_homepage.jsp" class="btn btn-secondary">返回首页</a>
     </div>
 
     <!-- 搜索框 -->

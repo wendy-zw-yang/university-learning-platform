@@ -206,7 +206,7 @@
 
     <div class="actions">
         <h2>所有课程</h2>
-        <a href="${pageContext.request.contextPath}/student-homepage.jsp" class="btn btn-secondary">返回学生首页</a>
+        <a href="${pageContext.request.contextPath}/student_homepage.jsp" class="btn btn-secondary">返回学生首页</a>
     </div>
 
     <%
