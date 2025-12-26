@@ -6,13 +6,13 @@ import java.sql.SQLException;
 
 public class DBHelper {
     public static String getConnectionString() {
-        return "jdbc:mysql://localhost:3306/learning_platform?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        return "jdbc:mysql://localhost:3306/ulpdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     }
     public static String getUsername() {
-        return "root";
+        return "devplogin";
     }
     public static String getPassword() {
-        return "1111";
+        return "devplogin";
     }
     public static String getDriverClassName() {
         return "com.mysql.cj.jdbc.Driver";
