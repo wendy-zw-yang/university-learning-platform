@@ -141,12 +141,12 @@
                 <h3>学习资源</h3>
             </div>
 
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToQnA()">
                 <div class="icon">📝</div>
                 <h3>问答讨论</h3>
             </div>
 
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToResources()">
                 <div class="icon">📊</div>
                 <h3>管理个人资源</h3>
             </div>
@@ -159,6 +159,9 @@
     }
     function goToResources() {
         window.location.href = "${pageContext.request.contextPath}/student/resource";
+    }
+    function goToQnA() {
+        window.location.href = "${pageContext.request.contextPath}/student/questions";
     }
 </script>
 </html>

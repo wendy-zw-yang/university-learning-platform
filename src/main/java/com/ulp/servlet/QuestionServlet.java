@@ -6,6 +6,7 @@ import com.ulp.bean.UserModel;
 import com.ulp.dao.CourseDao;
 import com.ulp.dao.impl.CourseDaoImpl;
 import com.ulp.service.CourseService;
+import com.ulp.service.QuestionService;
 import com.ulp.util.DBHelper;
 
 import jakarta.servlet.ServletException;
@@ -15,6 +16,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -75,9 +78,9 @@ public class QuestionServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // 获取当前登录学生ID
-        Integer studentId = (Integer) request.getSession().getAttribute("userId");
-        if (studentId == null) {
+        // 获取当前登录学生，这里假设已登录学生user存储在session中
+        UserModel student= (UserModel) request.getSession().getAttribute("user");
+        if (student == null) {
             // 如果未登录，重定向到登录页面
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
@@ -109,7 +112,11 @@ public class QuestionServlet extends HttpServlet {
                 if (fileName != null && !fileName.trim().isEmpty()) {
                     // 这里应该将文件保存到指定位置，并返回文件路径
                     // 为简化，这里直接使用原始文件名，实际应用中应生成唯一文件名
-                    attachmentPath = "/uploads/questions/" + System.currentTimeMillis() + "_" + fileName;
+                    String uploadFolder = getServletContext().getRealPath("/upload/questions");
+                    File uploadDir = new File(uploadFolder);
+                    if(!uploadDir.exists())
+                        uploadDir.mkdirs();
+                    attachmentPath = "/upload/questions/" + System.currentTimeMillis() + "_" + fileName;
                     
                     // 保存文件到指定目录
                     String uploadPath = getServletContext().getRealPath(attachmentPath);
@@ -123,21 +130,21 @@ public class QuestionServlet extends HttpServlet {
             question.setContent(content);
             question.setAttachment(attachmentPath);
             question.setCourseId(courseId);
-            question.setStudentId(studentId);
+            question.setStudentId(student.getId());
             question.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
             // 保存问题到数据库
-            boolean success = saveQuestion(question);
-            
+            QuestionService questionService = new QuestionService();
+            boolean success = questionService.addQuestion(question);
+
             if (success) {
                 // 保存成功，重定向到成功页面或课程页面
                 request.setAttribute("success", "问题提交成功！");
-                request.getRequestDispatcher("/ask_question.jsp").forward(request, response);
             } else {
                 request.setAttribute("error", "问题提交失败，请重试");
-                request.getRequestDispatcher("/ask_question.jsp").forward(request, response);
             }
-            
+            request.setAttribute("course", new CourseService().getCourseById(courseId));
+            request.getRequestDispatcher("/ask_question.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             request.setAttribute("error", "课程ID格式不正确");
             request.getRequestDispatcher("/ask_question.jsp").forward(request, response);
@@ -147,28 +154,7 @@ public class QuestionServlet extends HttpServlet {
             request.getRequestDispatcher("/ask_question.jsp").forward(request, response);
         }
     }
-    
 
-    // 保存问题到数据库
-    private boolean saveQuestion(QuestionModel question) {
-        String sql = "INSERT INTO questions (title, content, attachment, course_id, student_id, created_at) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, question.getTitle());
-            pstmt.setString(2, question.getContent());
-            pstmt.setString(3, question.getAttachment());
-            pstmt.setInt(4, question.getCourseId());
-            pstmt.setInt(5, question.getStudentId());
-            pstmt.setTimestamp(6, question.getCreatedAt());
-            
-            int result = pstmt.executeUpdate();
-            return result > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
     
     // 获取上传文件的文件名
     private String getFileName(Part part) {

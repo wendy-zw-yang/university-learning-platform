@@ -184,7 +184,7 @@
             
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">提交问题</button>
-                <a href="javascript:history.back()" class="btn btn-secondary">返回</a>
+                <a href="${pageContext.request.contextPath}/student/courses" class="btn btn-secondary">返回</a>
             </div>
         </form>
     </div>
