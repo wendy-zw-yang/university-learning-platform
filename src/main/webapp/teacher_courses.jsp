@@ -170,7 +170,7 @@
 
     <div class="actions">
         <h2>我的课程列表</h2>
-        <a href="${pageContext.request.contextPath}/jsp/teacher/teacher-homepage.jsphomepage.jsp" class="btn btn-secondary">返回教师主页</a>
+        <a href="${pageContext.request.contextPath}/teacher_homepage.jsp" class="btn btn-secondary">返回教师主页</a>
     </div>
 
     <%

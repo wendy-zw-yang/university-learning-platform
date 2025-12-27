@@ -28,9 +28,9 @@ import java.util.List;
 )
 @WebServlet("/teacher/resource")
 public class TeacherResourceServlet extends HttpServlet {
-    private ResourceService resourceService;
-    private CourseService courseService;
-    private TeacherService teacherService;
+    private final ResourceService resourceService;
+    private final CourseService courseService;
+    private final TeacherService teacherService;
 
     public TeacherResourceServlet() {
         this.resourceService = new ResourceService();

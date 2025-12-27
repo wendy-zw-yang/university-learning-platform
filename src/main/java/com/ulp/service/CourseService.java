@@ -1,6 +1,8 @@
 package com.ulp.service;
 
 import com.ulp.bean.CourseModel;
+import com.ulp.dao.CourseDao;
+import com.ulp.dao.impl.CourseDaoImpl;
 import com.ulp.util.DBHelper;
 
 import java.sql.*;
@@ -48,30 +50,8 @@ public class CourseService {
      * @return 课程对象，如果不存在返回null
      */
     public CourseModel getCourseById(int id) {
-        String sql = "SELECT id, name, teacher_id, description, college, visibility, created_at FROM courses WHERE id = ?";
-        
-        try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                CourseModel course = new CourseModel();
-                course.setId(rs.getInt("id"));
-                course.setName(rs.getString("name"));
-                course.setTeacherId(rs.getObject("teacher_id") != null ? rs.getInt("teacher_id") : null);
-                course.setDescription(rs.getString("description"));
-                course.setCollege(rs.getString("college"));
-                course.setVisibility(rs.getString("visibility"));
-                course.setCreatedAt(rs.getTimestamp("created_at"));
-                return course;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return null;
+        CourseDao courseDao = new CourseDaoImpl();
+        return courseDao.getCourseById(id);
     }
 
     /**
