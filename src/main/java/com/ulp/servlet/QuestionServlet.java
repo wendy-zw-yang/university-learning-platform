@@ -185,7 +185,7 @@ public class QuestionServlet extends HttpServlet {
                 }
                 
                 // 重定向回问题页面
-                response.sendRedirect(request.getContextPath() + "/student/questions");
+                response.sendRedirect(request.getContextPath() + "/teacher/questions");
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "问题ID格式不正确");
                 request.getRequestDispatcher("/answer_question.jsp").forward(request, response);

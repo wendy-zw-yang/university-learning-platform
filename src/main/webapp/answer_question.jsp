@@ -243,7 +243,7 @@
             
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">提交回答</button>
-                <a href="${pageContext.request.contextPath}/student/questions" class="btn btn-secondary">返回</a>
+                <a href="${pageContext.request.contextPath}/teacher/questions" class="btn btn-secondary">返回</a>
             </div>
         </form>
     </div>
