@@ -4,4 +4,5 @@ import com.ulp.bean.QuestionModel;
 
 public interface QuestionDao {
     public boolean saveQuestion(QuestionModel question);
+    public QuestionModel getQuestionById(int id);
 }

@@ -10,4 +10,11 @@ public class QuestionService {
         QuestionDaoImpl questionDao = new QuestionDaoImpl();
         return questionDao.saveQuestion(question);
     }
+    
+    // 根据ID获取问题
+    public QuestionModel getQuestionById(int id) {
+        // 这里需要添加一个根据ID获取问题的方法到DAO中
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.getQuestionById(id);
+    }
 }

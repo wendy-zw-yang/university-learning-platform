@@ -6,6 +6,7 @@ import com.ulp.util.DBHelper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class QuestionDaoImpl implements QuestionDao {
@@ -29,5 +30,32 @@ public class QuestionDaoImpl implements QuestionDao {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    @Override
+    // 根据ID获取问题
+    public QuestionModel getQuestionById(int id) {
+        String sql = "SELECT * FROM questions WHERE id = ?";
+        QuestionModel question = null;
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                question = new QuestionModel();
+                question.setId(rs.getInt("id"));
+                question.setTitle(rs.getString("title"));
+                question.setContent(rs.getString("content"));
+                question.setAttachment(rs.getString("attachment"));
+                question.setCourseId(rs.getInt("course_id"));
+                question.setStudentId(rs.getInt("student_id"));
+                question.setCreatedAt(rs.getTimestamp("created_at"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return question;
     }
 }

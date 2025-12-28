@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.ulp.servlet.StudentQuestionServlet" %>
+<%@ page import="com.ulp.servlet.TeacherQuestionServlet" %>
 <%@ page import="com.ulp.bean.QuestionModel" %>
 <%@ page import="com.ulp.bean.AnswerModel" %>
 <%@ page import="com.ulp.bean.CourseModel" %>
@@ -8,20 +9,29 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="com.ulp.bean.UserModel" %>
 <%
-    // 验证用户是否登录且为学生
+    // 获取当前登录用户
     UserModel userObj = (UserModel)session.getAttribute("user");
-    if (userObj == null || !"student".equals(userObj.getRole())) {
-        System.out.println("未登录!@ course Question jsp");
+    if (userObj == null || (!"student".equals(userObj.getRole()) && !"teacher".equals(userObj.getRole()))) {
+//        System.out.println("未登录!@ course Question jsp");
         response.sendRedirect(request.getContextPath() + "/login.jsp");
         return;
     }
 
+    String role = userObj.getRole();
+    
     // 获取课程列表和问题列表
-    List<StudentQuestionServlet.CourseWithQuestionCount> courses = 
-        (List<StudentQuestionServlet.CourseWithQuestionCount>) request.getAttribute("courses");
-    List<StudentQuestionServlet.QuestionWithAnswers> questions = 
-        (List<StudentQuestionServlet.QuestionWithAnswers>) request.getAttribute("questions");
+    List<?> courses = null;
+    List<?> questions = null;
     Integer selectedCourseId = (Integer) request.getAttribute("selectedCourseId");
+
+    // 根据用户角色获取对应的数据
+    if ("student".equals(role)) {
+        courses = (List<StudentQuestionServlet.CourseWithQuestionCount>) request.getAttribute("courses");
+        questions = (List<StudentQuestionServlet.QuestionWithAnswers>) request.getAttribute("questions");
+    } else if ("teacher".equals(role)) {
+        courses = (List<TeacherQuestionServlet.CourseWithQuestionCount>) request.getAttribute("courses");
+        questions = (List<TeacherQuestionServlet.QuestionWithAnswers>) request.getAttribute("questions");
+    }
 
     // 获取错误信息
     String errorMessage = (String) request.getAttribute("error");
@@ -35,7 +45,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>问答讨论 - 学生</title>
+    <title>问答讨论 - <%= "teacher".equals(role) ? "教师" : "学生" %></title>
     <style>
         * {
             margin: 0;
@@ -97,6 +107,15 @@
 
         .btn-secondary:hover {
             background-color: #5a6268;
+        }
+        
+        .btn-answer {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-answer:hover {
+            background-color: #218838;
         }
 
         .message {
@@ -232,7 +251,7 @@
 <div class="container">
     <div class="header">
         <h1>💬 问答讨论区</h1>
-        <a href="${pageContext.request.contextPath}/student_homepage.jsp" class="btn btn-secondary">返回首页</a>
+        <a href="${pageContext.request.contextPath}/<%= "teacher".equals(role) ? "teacher_homepage.jsp" : "student_homepage.jsp" %>" class="btn btn-secondary">返回首页</a>
     </div>
 
     <%-- 显示消息 --%>
@@ -249,28 +268,48 @@
     <div class="course-list">
         <h2>课程列表</h2>
         <% if (courses != null && !courses.isEmpty()) { %>
-        <% for (StudentQuestionServlet.CourseWithQuestionCount courseWithCount : courses) {
-            CourseModel course = courseWithCount.getCourse();
+        <% for (Object courseObj : courses) {
+            Object courseWithCount = courseObj;
+            CourseModel course = null;
+            String teacherName = null;
+            int questionCount = 0;
+            
+            // 根据用户角色获取相应类型的对象
+            if ("student".equals(role)) {
+                StudentQuestionServlet.CourseWithQuestionCount studentCourse = (StudentQuestionServlet.CourseWithQuestionCount) courseObj;
+                course = studentCourse.getCourse();
+                teacherName = studentCourse.getTeacherName();
+                questionCount = studentCourse.getQuestionCount();
+            } else if ("teacher".equals(role)) {
+                TeacherQuestionServlet.CourseWithQuestionCount teacherCourse = (TeacherQuestionServlet.CourseWithQuestionCount) courseObj;
+                course = teacherCourse.getCourse();
+                teacherName = teacherCourse.getTeacherName();
+                questionCount = teacherCourse.getQuestionCount();
+            }
         %>
         <div class="course-item">
-            <a href="${pageContext.request.contextPath}/student/questions?courseId=<%= course.getId() %>" class="course-link">
+            <a href="${pageContext.request.contextPath}/<%= "teacher".equals(role) ? "teacher" : "student" %>/questions?courseId=<%= course.getId() %>" class="course-link">
                 <div class="course-header">
                     <div>
                         <strong><%= course.getName() %></strong>
                         <span>ID: <%= course.getId() %></span>
-                        <% if (courseWithCount.getTeacherName() != null) { %>
-                        <span> | 教师: <%= courseWithCount.getTeacherName() %></span>
+                        <% if (teacherName != null) { %>
+                        <span> | 教师: <%= teacherName %></span>
                         <% } %>
                     </div>
                     <div>
-                        <span class="course-count"><%= courseWithCount.getQuestionCount() %> 个问题</span>
+                        <span class="course-count"><%= questionCount %> 个问题</span>
                     </div>
                 </div>
                 <% if (course.getDescription() != null && !course.getDescription().isEmpty()) { %>
                 <div><%= course.getDescription() %></div>
                 <% } %>
             </a>
+            <% if ("student".equals(role)) { %>
             <a href="${pageContext.request.contextPath}/questions?courseId=<%= course.getId() %>" class="btn btn-primary">提问</a>
+            <% } else { %>
+            <a href="${pageContext.request.contextPath}/teacher/courses" class="btn btn-primary">查看课程</a>
+            <% } %>
         </div>
         <% } %>
         <% } else { %>
@@ -282,14 +321,23 @@
     <% } else { %>
     <!-- 问题列表 -->
     <h2>
-        <a href="${pageContext.request.contextPath}/student/questions" style="text-decoration: none; color: #007bff;">&larr; 返回课程列表</a>
+        <a href="${pageContext.request.contextPath}/<%= "teacher".equals(role) ? "teacher" : "student" %>/questions" style="text-decoration: none; color: #007bff;">&larr; 返回课程列表</a>
         <br><br>
         课程: 
         <% if (courses != null) {
-            for (StudentQuestionServlet.CourseWithQuestionCount courseWithCount : courses) {
-                if (courseWithCount.getCourse().getId() == selectedCourseId) {
+            for (Object courseObj : courses) {
+                Object courseWithCount = courseObj;
+                CourseModel course = null;
+                if ("student".equals(role)) {
+                    StudentQuestionServlet.CourseWithQuestionCount studentCourse = (StudentQuestionServlet.CourseWithQuestionCount) courseObj;
+                    course = studentCourse.getCourse();
+                } else if ("teacher".equals(role)) {
+                    TeacherQuestionServlet.CourseWithQuestionCount teacherCourse = (TeacherQuestionServlet.CourseWithQuestionCount) courseObj;
+                    course = teacherCourse.getCourse();
+                }
+                if (course.getId() == selectedCourseId) {
         %>
-        <strong><%= courseWithCount.getCourse().getName() %></strong>
+        <strong><%= course.getName() %></strong>
         <% 
                     break;
                 }
@@ -298,14 +346,30 @@
     </h2>
 
     <% if (questions != null && !questions.isEmpty()) { %>
-    <% for (StudentQuestionServlet.QuestionWithAnswers questionWithAnswers : questions) {
-        QuestionModel question = questionWithAnswers.getQuestion();
+    <% for (Object questionObj : questions) {
+        Object questionWithAnswers = questionObj;
+        QuestionModel question = null;
+        String studentName = null;
+        List<AnswerModel> answers = null;
+        
+        // 根据用户角色获取相应类型的对象
+        if ("student".equals(role)) {
+            StudentQuestionServlet.QuestionWithAnswers studentQuestion = (StudentQuestionServlet.QuestionWithAnswers) questionObj;
+            question = studentQuestion.getQuestion();
+            studentName = studentQuestion.getStudentName();
+            answers = studentQuestion.getAnswers();
+        } else if ("teacher".equals(role)) {
+            TeacherQuestionServlet.QuestionWithAnswers teacherQuestion = (TeacherQuestionServlet.QuestionWithAnswers) questionObj;
+            question = teacherQuestion.getQuestion();
+            studentName = teacherQuestion.getStudentName();
+            answers = teacherQuestion.getAnswers();
+        }
     %>
     <div class="question-content">
         <div class="question-title">
             <%= question.getTitle() %>
             <span style="font-weight: normal; color: #666; font-size: 14px; margin-left: 10px;">
-                学生: <%= questionWithAnswers.getStudentName() %> | 
+                学生: <%= studentName %> | 
                 时间: <%= question.getCreatedAt() != null ? dateFormat.format(question.getCreatedAt()) : "-" %>
             </span>
         </div>
@@ -322,14 +386,17 @@
         <!-- 显示回答 -->
         <div style="margin-top: 15px;">
             <strong>教师回答:</strong>
-            <% if (questionWithAnswers.hasAnswers()) { %>
-                <% for (AnswerModel answer : questionWithAnswers.getAnswers()) { %>
+            <% if (answers != null && !answers.isEmpty()) { %>
+                <% for (AnswerModel answer : answers) { %>
                 <div class="answer-content">
                     <%= answer.getContent() %>
                     <div style="font-size: 12px; color: #666; margin-top: 5px;">
                         教师: 
-                        <%-- 这里需要获取教师名称，我们暂时显示ID --%>
-                        ID <%= answer.getTeacherId() %> | 
+                        <% if (answer.getTeacherName() != null) { %>
+                        <%= answer.getTeacherName() %>
+                        <% } else { %>
+                        ID <%= answer.getTeacherId() %>
+                        <% } %> | 
                         时间: <%= answer.getCreatedAt() != null ? dateFormat.format(answer.getCreatedAt()) : "-" %>
                     </div>
                     <% if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) { %>
@@ -342,6 +409,9 @@
                 <% } %>
             <% } else { %>
                 <div style="color: #dc3545; font-style: italic;">待回答</div>
+                <% if ("teacher".equals(role)) { %>
+                <a href="${pageContext.request.contextPath}/questions?action=answer&questionId=<%= question.getId() %>" class="btn btn-answer" style="margin-top: 10px; display: inline-block;">回答问题</a>
+                <% } %>
             <% } %>
         </div>
     </div>

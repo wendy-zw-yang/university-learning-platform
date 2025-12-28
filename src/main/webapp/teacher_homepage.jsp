@@ -1,11 +1,37 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.ulp.bean.UserModel" %>
+<%@ page import="com.ulp.util.DBHelper" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
 <%
     // 验证用户是否登录且为教师
     UserModel user = (UserModel) session.getAttribute("user");
     if (user == null || !"teacher".equals(user.getRole())) {
         response.sendRedirect(request.getContextPath() + "/login");
         return;
+    }
+    
+    // 查询未回答问题的数量
+    int unansweredQuestionsCount = 0;
+    String sql = "SELECT COUNT(*) FROM questions q " +
+                 "LEFT JOIN courses c ON q.course_id = c.id " +
+                 "LEFT JOIN teacher_courses tc ON c.id = tc.course_id " +
+                 "WHERE (c.teacher_id = ? OR tc.teacher_id = ?) " +
+                 "AND q.id NOT IN (SELECT DISTINCT question_id FROM answers)";
+    
+    try (Connection conn = DBHelper.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setInt(1, user.getId());
+        pstmt.setInt(2, user.getId());
+        ResultSet rs = pstmt.executeQuery();
+        
+        if (rs.next()) {
+            unansweredQuestionsCount = rs.getInt(1);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
 %>
 <!DOCTYPE html>
@@ -81,6 +107,14 @@
             color: #4d4d4d;
             margin-bottom: 10px;
         }
+        
+        .message-box h2 .content {
+            display: inline-block;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
     
         .dashboard-grid {
             display: grid;
@@ -144,7 +178,7 @@
         </div>
         <!-- 以下完善新问题通知功能 （实现绑定以及跳转功能）-->
         <div class="message-box">
-            <h2 class="content">您所上课程有 条未回答问题</h2>
+            <h2>您所上课程有 <span class="content"><%= unansweredQuestionsCount %></span> 条未回答问题</h2>
         </div>
         <div class="dashboard-grid">
             <div class="dashboard-card" onclick="goToUploadResource()">
@@ -152,7 +186,7 @@
                 <h3>发布学习资源</h3>
             </div>
             
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToAnswerQuestions()">
                 <div class="icon">📝</div>
                 <h3>回答学生问题</h3>
             </div>
@@ -170,6 +204,9 @@
     }
     function goToUploadResource() {
         window.location.href='${pageContext.request.contextPath}/teacher/resource';
+    }
+    function goToAnswerQuestions() {
+        window.location.href='${pageContext.request.contextPath}/teacher/questions';
     }
 </script>
 </html>

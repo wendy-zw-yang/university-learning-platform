@@ -20,23 +20,68 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/student/questions")
-public class StudentQuestionServlet extends HttpServlet {
+@WebServlet("/teacher/questions")
+public class TeacherQuestionServlet extends HttpServlet {
+    // 用于封装课程和问题数量的内部类
+    public static class CourseWithQuestionCount {
+        private CourseModel course;
+        private String teacherName;
+        private int questionCount;
+        
+        public CourseWithQuestionCount(CourseModel course, String teacherName, int questionCount) {
+            this.course = course;
+            this.teacherName = teacherName;
+            this.questionCount = questionCount;
+        }
+        
+        public CourseModel getCourse() { return course; }
+        public void setCourse(CourseModel course) { this.course = course; }
+        
+        public String getTeacherName() { return teacherName; }
+        public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
+        
+        public int getQuestionCount() { return questionCount; }
+        public void setQuestionCount(int questionCount) { this.questionCount = questionCount; }
+    }
+    
+    // 用于封装问题和回答的内部类
+    public static class QuestionWithAnswers {
+        private QuestionModel question;
+        private String studentName;
+        private List<AnswerModel> answers;
+        
+        public QuestionWithAnswers(QuestionModel question, String studentName, List<AnswerModel> answers) {
+            this.question = question;
+            this.studentName = studentName;
+            this.answers = answers;
+        }
+        
+        public QuestionModel getQuestion() { return question; }
+        public void setQuestion(QuestionModel question) { this.question = question; }
+        
+        public String getStudentName() { return studentName; }
+        public void setStudentName(String studentName) { this.studentName = studentName; }
+        
+        public List<AnswerModel> getAnswers() { return answers; }
+        public void setAnswers(List<AnswerModel> answers) { this.answers = answers; }
+        
+        public boolean hasAnswers() { return answers != null && !answers.isEmpty(); }
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // 获取当前登录学生，这里假设已登录学生user存储在session中
-        UserModel student= (UserModel) request.getSession().getAttribute("user");
-        if (student == null) {
-            // 如果未登录，重定向到登录页面
-            System.out.println("未登录!@ StudentQuestionServlet");
+        // 获取当前登录教师，这里假设已登录教师user存储在session中
+        UserModel teacher = (UserModel) request.getSession().getAttribute("user");
+        if (teacher == null || !"teacher".equals(teacher.getRole())) {
+            // 如果未登录或不是教师，重定向到登录页面
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 
         try {
-            // 获取课程列表
-            List<CourseWithQuestionCount> courses = getCoursesByStudentId(student.getId());
+            // 获取教师教授的课程列表
+            List<CourseWithQuestionCount> courses = getCoursesByTeacherId(teacher.getId());
             
             // 获取课程ID参数
             String courseIdParam = request.getParameter("courseId");
@@ -44,6 +89,21 @@ public class StudentQuestionServlet extends HttpServlet {
             if (courseIdParam != null && !courseIdParam.isEmpty()) {
                 try {
                     int courseId = Integer.parseInt(courseIdParam);
+                    
+                    // 验证该课程是否属于当前教师
+                    boolean isTeacherCourse = false;
+                    for (CourseWithQuestionCount course : courses) {
+                        if (course.getCourse().getId() == courseId) {
+                            isTeacherCourse = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!isTeacherCourse) {
+                        request.setAttribute("error", "您没有权限查看此课程的问题");
+                        request.getRequestDispatcher("/course_question.jsp").forward(request, response);
+                        return;
+                    }
                     
                     // 获取该课程的问题列表
                     List<QuestionWithAnswers> questions = getQuestionsByCourseId(courseId);
@@ -70,24 +130,21 @@ public class StudentQuestionServlet extends HttpServlet {
         }
     }
 
-    // 根据学生ID获取课程列表
-    private List<CourseWithQuestionCount> getCoursesByStudentId(int studentId) {
+    // 根据教师ID获取课程列表
+    private List<CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
         List<CourseWithQuestionCount> courses = new ArrayList<>();
         
-        // 获取学生已选课程ID列表
-        List<Integer> enrolledCourseIds = getEnrolledCourseIds(studentId);
-        
-        if (enrolledCourseIds.isEmpty()) {
-            return courses; // 返回空列表
-        }
-        
-        // 构建IN子句的参数
-        String inSql = String.join(",", enrolledCourseIds.stream().map(String::valueOf).toArray(String[]::new));
         String sql = "SELECT c.*, u.username as teacher_name FROM courses c " +
-                     "LEFT JOIN users u ON c.teacher_id = u.id WHERE c.id IN (" + inSql + ")";
+                     "LEFT JOIN users u ON c.teacher_id = u.id " +
+                     "WHERE c.teacher_id = ? OR c.id IN (" +
+                     "SELECT tc.course_id FROM teacher_courses tc WHERE tc.teacher_id = ?" +
+                     ") ORDER BY c.name";
         
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, teacherId);
+            pstmt.setInt(2, teacherId);
             
             ResultSet rs = pstmt.executeQuery();
             
@@ -103,8 +160,8 @@ public class StudentQuestionServlet extends HttpServlet {
                 
                 String teacherName = rs.getString("teacher_name");
                 
-                // 计算该课程的问题数量
-                int questionCount = getQuestionCountByCourseId(course.getId());
+                // 计算该课程的未回答问题数量
+                int questionCount = getUnansweredQuestionCountByCourseId(course.getId());
                 
                 courses.add(new CourseWithQuestionCount(course, teacherName, questionCount));
             }
@@ -113,28 +170,6 @@ public class StudentQuestionServlet extends HttpServlet {
         }
         
         return courses;
-    }
-    
-    // 获取学生已选课程ID列表
-    private List<Integer> getEnrolledCourseIds(int studentId) {
-        List<Integer> courseIds = new ArrayList<>();
-        
-        String sql = "SELECT course_id FROM student_courses WHERE student_id = ?";
-        
-        try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, studentId);
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                courseIds.add(rs.getInt("course_id"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return courseIds;
     }
     
     // 获取指定课程的问题列表
@@ -207,7 +242,31 @@ public class StudentQuestionServlet extends HttpServlet {
         return answerList;
     }
     
-    // 获取指定课程的问题数量
+    // 获取指定课程的未回答问题数量
+    private int getUnansweredQuestionCountByCourseId(int courseId) {
+        int count = 0;
+        String sql = "SELECT COUNT(*) FROM questions WHERE course_id = ? AND id NOT IN (" +
+                     "SELECT DISTINCT question_id FROM answers WHERE question_id IN (" +
+                     "SELECT id FROM questions WHERE course_id = ?))";
+        
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, courseId);
+            pstmt.setInt(2, courseId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return count;
+    }
+    
+    // 获取指定课程的总问题数量
     private int getQuestionCountByCourseId(int courseId) {
         int count = 0;
         String sql = "SELECT COUNT(*) FROM questions WHERE course_id = ?";
@@ -226,51 +285,5 @@ public class StudentQuestionServlet extends HttpServlet {
         }
         
         return count;
-    }
-    
-    // 用于封装课程和问题数量的内部类
-    public static class CourseWithQuestionCount {
-        private CourseModel course;
-        private String teacherName;
-        private int questionCount;
-        
-        public CourseWithQuestionCount(CourseModel course, String teacherName, int questionCount) {
-            this.course = course;
-            this.teacherName = teacherName;
-            this.questionCount = questionCount;
-        }
-        
-        public CourseModel getCourse() { return course; }
-        public void setCourse(CourseModel course) { this.course = course; }
-        
-        public String getTeacherName() { return teacherName; }
-        public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
-        
-        public int getQuestionCount() { return questionCount; }
-        public void setQuestionCount(int questionCount) { this.questionCount = questionCount; }
-    }
-    
-    // 用于封装问题和回答的内部类
-    public static class QuestionWithAnswers {
-        private QuestionModel question;
-        private String studentName;
-        private List<AnswerModel> answers;
-        
-        public QuestionWithAnswers(QuestionModel question, String studentName, List<AnswerModel> answers) {
-            this.question = question;
-            this.studentName = studentName;
-            this.answers = answers;
-        }
-        
-        public QuestionModel getQuestion() { return question; }
-        public void setQuestion(QuestionModel question) { this.question = question; }
-        
-        public String getStudentName() { return studentName; }
-        public void setStudentName(String studentName) { this.studentName = studentName; }
-        
-        public List<AnswerModel> getAnswers() { return answers; }
-        public void setAnswers(List<AnswerModel> answers) { this.answers = answers; }
-        
-        public boolean hasAnswers() { return answers != null && !answers.isEmpty(); }
     }
 }
