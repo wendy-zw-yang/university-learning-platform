@@ -122,57 +122,43 @@ public class AdminQuestionServlet extends HttpServlet {
         }
     }
 
-    private void handleDelete(HttpServletRequest request, HttpServletResponse response) 
+    private void handleDelete(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         String questionIdParam = request.getParameter("questionId");
         String answerIdParam = request.getParameter("answerId");
         String courseIdParam = request.getParameter("courseId");
-        
+
         try {
             QuestionService questionService = new QuestionService();
-            
+
             if (questionIdParam != null && !questionIdParam.isEmpty()) {
                 // 删除问题（以及其相关回答）
                 int questionId = Integer.parseInt(questionIdParam);
                 boolean success = questionService.deleteQuestionById(questionId);
-                
-                if (success) {
-                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
-                        response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&success=问题删除成功");
-                    } else {
-                        response.sendRedirect(request.getContextPath() + "/admin/questions?success=问题删除成功");
-                    }
+
+                // 重定向时不包含成功/失败信息
+                if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam);
                 } else {
-                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
-                        response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&error=删除失败");
-                    } else {
-                        response.sendRedirect(request.getContextPath() + "/admin/questions?error=删除失败");
-                    }
+                    response.sendRedirect(request.getContextPath() + "/admin/questions");
                 }
             } else if (answerIdParam != null && !answerIdParam.isEmpty()) {
                 // 删除回答
                 int answerId = Integer.parseInt(answerIdParam);
                 boolean success = questionService.deleteAnswerById(answerId);
-                
-                if (success) {
-                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
-                        response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&success=回答删除成功");
-                    } else {
-                        response.sendRedirect(request.getContextPath() + "/admin/questions?success=回答删除成功");
-                    }
+
+                // 重定向时不包含成功/失败信息
+                if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam);
                 } else {
-                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
-                        response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&error=删除失败");
-                    } else {
-                        response.sendRedirect(request.getContextPath() + "/admin/questions?error=删除失败");
-                    }
+                    response.sendRedirect(request.getContextPath() + "/admin/questions");
                 }
             }
         } catch (NumberFormatException e) {
             if (courseIdParam != null && !courseIdParam.isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&error=ID格式不正确");
+                response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam);
             } else {
-                response.sendRedirect(request.getContextPath() + "/admin/questions?error=ID格式不正确");
+                response.sendRedirect(request.getContextPath() + "/admin/questions");
             }
         }
     }
