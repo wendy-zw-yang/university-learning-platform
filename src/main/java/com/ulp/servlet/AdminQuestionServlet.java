@@ -50,7 +50,8 @@ public class AdminQuestionServlet extends HttpServlet {
             
             // 获取课程ID参数
             String courseIdParam = request.getParameter("courseId");
-            
+            System.out.println("doGet - courseId parameter: " + courseIdParam);
+
             if (courseIdParam != null && !courseIdParam.isEmpty()) {
                 try {
                     int courseId = Integer.parseInt(courseIdParam);
@@ -127,7 +128,10 @@ public class AdminQuestionServlet extends HttpServlet {
         String questionIdParam = request.getParameter("questionId");
         String answerIdParam = request.getParameter("answerId");
         String courseIdParam = request.getParameter("courseId");
-        
+        if ("null".equals(courseIdParam)) {
+            courseIdParam = null;
+        }
+
         try {
             QuestionService questionService = new QuestionService();
             
