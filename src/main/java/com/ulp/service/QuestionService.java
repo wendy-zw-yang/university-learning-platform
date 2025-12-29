@@ -1,8 +1,14 @@
 package com.ulp.service;
 
+import com.ulp.bean.AnswerModel;
+import com.ulp.bean.CourseWithQuestionCount;
 import com.ulp.bean.QuestionModel;
+import com.ulp.bean.QuestionWithAnswers;
 import com.ulp.dao.QuestionDao;
 import com.ulp.dao.impl.QuestionDaoImpl;
+import com.ulp.servlet.TeacherQuestionServlet;
+
+import java.util.List;
 
 public class QuestionService {
     // 添加问题到数据库
@@ -10,11 +16,52 @@ public class QuestionService {
         QuestionDaoImpl questionDao = new QuestionDaoImpl();
         return questionDao.saveQuestion(question);
     }
-    
+
     // 根据ID获取问题
     public QuestionModel getQuestionById(int id) {
         // 这里需要添加一个根据ID获取问题的方法到DAO中
         QuestionDaoImpl questionDao = new QuestionDaoImpl();
         return questionDao.getQuestionById(id);
+    }
+
+    // 根据教师ID获取课程列表
+    public List<TeacherQuestionServlet.CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
+        QuestionDao questionDao = new QuestionDaoImpl();
+        return questionDao.getCoursesByTeacherId(teacherId);
+    }
+
+    public List<TeacherQuestionServlet.QuestionWithAnswers> getQuestionsByCourseId(int courseId) {
+        QuestionDao questionDao = new QuestionDaoImpl();
+        return questionDao.getQuestionsByCourseId(courseId);
+    }
+
+    public List<AnswerModel> getAnswersByQuestionId(int questionId) {
+        QuestionDao questionDao = new QuestionDaoImpl();
+        return questionDao.getAnswersByQuestionId(questionId);
+    }
+
+    public int getUnansweredQuestionCountByCourseId(int courseId) {
+        QuestionDao questionDao = new QuestionDaoImpl();
+        return questionDao.getUnansweredQuestionCountByCourseId(courseId);
+    }
+
+    public int getQuestionCountByCourseId(int courseId) {
+        QuestionDao questionDao = new QuestionDaoImpl();
+        return questionDao.getQuestionCountByCourseId(courseId);
+    }
+    
+    public List<CourseWithQuestionCount> getCoursesByStudentId(int studentId) {
+        QuestionDao questionDao = new QuestionDaoImpl();
+        return questionDao.getCoursesByStudentId(studentId);
+    }
+    
+    public List<QuestionWithAnswers> getQuestionsByCourseIdForStudent(int courseId) {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.getQuestionsByCourseIdGeneric(courseId);
+    }
+    
+    public List<Integer> getEnrolledCourseIds(int studentId) {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.getEnrolledCourseIds(studentId);
     }
 }

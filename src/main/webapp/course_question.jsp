@@ -307,9 +307,7 @@
             </a>
             <% if ("student".equals(role)) { %>
             <a href="${pageContext.request.contextPath}/questions?courseId=<%= course.getId() %>" class="btn btn-primary">提问</a>
-            <% } else { %>
-            <a href="${pageContext.request.contextPath}/teacher/courses" class="btn btn-primary">查看课程</a>
-            <% } %>
+            <% }%>
         </div>
         <% } %>
         <% } else { %>

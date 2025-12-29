@@ -5,6 +5,7 @@ import com.ulp.dao.CourseDao;
 import com.ulp.dao.impl.CourseDaoImpl;
 import com.ulp.dao.impl.QuestionDaoImpl;
 import com.ulp.dao.impl.AnswerDaoImpl;
+import com.ulp.service.QuestionService;
 import com.ulp.util.DBHelper;
 
 import jakarta.servlet.ServletException;
@@ -131,159 +132,54 @@ public class TeacherQuestionServlet extends HttpServlet {
     }
 
     // 根据教师ID获取课程列表
-    private List<CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
-        List<CourseWithQuestionCount> courses = new ArrayList<>();
+    public List<CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
+        QuestionService questionService = new QuestionService();
+        List<CourseWithQuestionCount> genericCourses = questionService.getCoursesByTeacherId(teacherId);
         
-        String sql = "SELECT c.*, u.username as teacher_name FROM courses c " +
-                     "LEFT JOIN users u ON c.teacher_id = u.id " +
-                     "WHERE c.teacher_id = ? OR c.id IN (" +
-                     "SELECT tc.course_id FROM teacher_courses tc WHERE tc.teacher_id = ?" +
-                     ") ORDER BY c.name";
-        
-        try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, teacherId);
-            pstmt.setInt(2, teacherId);
-            
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                CourseModel course = new CourseModel();
-                course.setId(rs.getInt("id"));
-                course.setName(rs.getString("name"));
-                course.setTeacherId(rs.getInt("teacher_id"));
-                course.setDescription(rs.getString("description"));
-                course.setCollege(rs.getString("college"));
-                course.setVisibility(rs.getString("visibility"));
-                course.setCreatedAt(rs.getTimestamp("created_at"));
-                
-                String teacherName = rs.getString("teacher_name");
-                
-                // 计算该课程的未回答问题数量
-                int questionCount = getUnansweredQuestionCountByCourseId(course.getId());
-                
-                courses.add(new CourseWithQuestionCount(course, teacherName, questionCount));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        // 转换通用类到内部类
+        List<CourseWithQuestionCount> teacherCourses = new ArrayList<>();
+        for (CourseWithQuestionCount genericCourse : genericCourses) {
+            teacherCourses.add(new CourseWithQuestionCount(
+                genericCourse.getCourse(),
+                genericCourse.getTeacherName(),
+                genericCourse.getQuestionCount()
+            ));
         }
-        
-        return courses;
+        return teacherCourses;
     }
     
     // 获取指定课程的问题列表
-    private List<QuestionWithAnswers> getQuestionsByCourseId(int courseId) {
-        List<QuestionWithAnswers> questions = new ArrayList<>();
+    public List<QuestionWithAnswers> getQuestionsByCourseId(int courseId) {
+        QuestionService questionService = new QuestionService();
+        List<com.ulp.bean.QuestionWithAnswers> genericQuestions = questionService.getQuestionsByCourseIdForStudent(courseId);
         
-        String sql = "SELECT q.*, u.username as student_name FROM questions q " +
-                     "LEFT JOIN users u ON q.student_id = u.id " +
-                     "WHERE q.course_id = ? ORDER BY q.created_at DESC";
-        
-        try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, courseId);
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                QuestionModel question = new QuestionModel();
-                question.setId(rs.getInt("id"));
-                question.setTitle(rs.getString("title"));
-                question.setContent(rs.getString("content"));
-                question.setAttachment(rs.getString("attachment"));
-                question.setCourseId(rs.getInt("course_id"));
-                question.setStudentId(rs.getInt("student_id"));
-                question.setCreatedAt(rs.getTimestamp("created_at"));
-                
-                String studentName = rs.getString("student_name");
-                
-                // 获取该问题的所有回答
-                List<AnswerModel> answers = getAnswersByQuestionId(question.getId());
-                
-                questions.add(new QuestionWithAnswers(question, studentName, answers));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        // 转换通用类到内部类
+        List<QuestionWithAnswers> teacherQuestions = new ArrayList<>();
+        for (com.ulp.bean.QuestionWithAnswers genericQuestion : genericQuestions) {
+            teacherQuestions.add(new QuestionWithAnswers(
+                genericQuestion.getQuestion(),
+                genericQuestion.getStudentName(),
+                genericQuestion.getAnswers()
+            ));
         }
-        
-        return questions;
+        return teacherQuestions;
     }
     
     // 获取指定问题的回答列表
     private List<AnswerModel> getAnswersByQuestionId(int questionId) {
-        List<AnswerModel> answerList = new ArrayList<>();
-        
-        String sql = "SELECT a.*, u.username as teacher_name FROM answers a " +
-                     "LEFT JOIN users u ON a.teacher_id = u.id " +
-                     "WHERE a.question_id = ? ORDER BY a.created_at ASC";
-        
-        try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, questionId);
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                AnswerModel answer = new AnswerModel();
-                answer.setId(rs.getInt("id"));
-                answer.setContent(rs.getString("content"));
-                answer.setAttachment(rs.getString("attachment"));
-                answer.setQuestionId(rs.getInt("question_id"));
-                answer.setTeacherId(rs.getInt("teacher_id"));
-                answer.setCreatedAt(rs.getTimestamp("created_at"));
-                answer.setTeacherName(rs.getString("teacher_name"));
-                answerList.add(answer);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return answerList;
+        QuestionService  questionService = new QuestionService();
+        return  questionService.getAnswersByQuestionId(questionId);
     }
     
     // 获取指定课程的未回答问题数量
-    private int getUnansweredQuestionCountByCourseId(int courseId) {
-        int count = 0;
-        String sql = "SELECT COUNT(*) FROM questions WHERE course_id = ? AND id NOT IN (" +
-                     "SELECT DISTINCT question_id FROM answers WHERE question_id IN (" +
-                     "SELECT id FROM questions WHERE course_id = ?))";
-        
-        try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, courseId);
-            pstmt.setInt(2, courseId);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return count;
+    public int getUnansweredQuestionCountByCourseId(int courseId) {
+        QuestionService  questionService = new QuestionService();
+        return  questionService.getUnansweredQuestionCountByCourseId(courseId);
     }
     
     // 获取指定课程的总问题数量
     private int getQuestionCountByCourseId(int courseId) {
-        int count = 0;
-        String sql = "SELECT COUNT(*) FROM questions WHERE course_id = ?";
-        
-        try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, courseId);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return count;
+        QuestionService questionService = new QuestionService();
+        return questionService.getQuestionCountByCourseId(courseId);
     }
 }
