@@ -45,6 +45,9 @@ public class AdminQuestionServlet extends HttpServlet {
                 ));
             }
             
+            // 设置课程列表
+            request.setAttribute("courses", adminCourses);
+            
             // 获取课程ID参数
             String courseIdParam = request.getParameter("courseId");
             
@@ -74,9 +77,6 @@ public class AdminQuestionServlet extends HttpServlet {
                 }
             }
             
-            // 设置课程列表
-            request.setAttribute("courses", adminCourses);
-            
             // 转发到课程-问题页面
             request.getRequestDispatcher("/admin_course_question.jsp").forward(request, response);
             
@@ -98,8 +98,27 @@ public class AdminQuestionServlet extends HttpServlet {
         }
 
         String action = request.getParameter("action");
+
+        // 改进调试信息 - 输出所有参数
+        System.out.println("AdminQuestionServlet doPost - action parameter: " + action);
+
+        // 输出所有参数的详细信息
+        java.util.Enumeration<String> paramNames = request.getParameterNames();
+        System.out.println("All parameters:");
+        while (paramNames.hasMoreElements()) {
+            String paramName = paramNames.nextElement();
+            String paramValue = request.getParameter(paramName);
+            System.out.println("  " + paramName + " = " + paramValue);
+        }
+
+        // 处理删除操作
         if ("delete".equals(action)) {
             handleDelete(request, response);
+        } else {
+            // 这个分支不应该被执行，除非action参数有问题
+            System.out.println("Invalid action parameter: " + action);
+            // 修改处1: 添加else处理无效action，避免doPost结束无响应导致空白
+            response.sendRedirect(request.getContextPath() + "/admin/questions?error=无效操作");
         }
     }
 
@@ -107,6 +126,7 @@ public class AdminQuestionServlet extends HttpServlet {
             throws IOException {
         String questionIdParam = request.getParameter("questionId");
         String answerIdParam = request.getParameter("answerId");
+        String courseIdParam = request.getParameter("courseId");
         
         try {
             QuestionService questionService = new QuestionService();
@@ -117,11 +137,17 @@ public class AdminQuestionServlet extends HttpServlet {
                 boolean success = questionService.deleteQuestionById(questionId);
                 
                 if (success) {
-                    response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + 
-                                        request.getParameter("courseId") + "&success=问题删除成功");
+                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                        response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&success=问题删除成功");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/admin/questions?success=问题删除成功");
+                    }
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + 
-                                        request.getParameter("courseId") + "&error=删除失败");
+                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                        response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&error=删除失败");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/admin/questions?error=删除失败");
+                    }
                 }
             } else if (answerIdParam != null && !answerIdParam.isEmpty()) {
                 // 删除回答
@@ -129,16 +155,25 @@ public class AdminQuestionServlet extends HttpServlet {
                 boolean success = questionService.deleteAnswerById(answerId);
                 
                 if (success) {
-                    response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + 
-                                        request.getParameter("courseId") + "&success=回答删除成功");
+                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                        response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&success=回答删除成功");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/admin/questions?success=回答删除成功");
+                    }
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + 
-                                        request.getParameter("courseId") + "&error=删除失败");
+                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                        response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&error=删除失败");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/admin/questions?error=删除失败");
+                    }
                 }
             }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + 
-                                request.getParameter("courseId") + "&error=ID格式不正确");
+            if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&error=ID格式不正确");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/questions?error=ID格式不正确");
+            }
         }
     }
     

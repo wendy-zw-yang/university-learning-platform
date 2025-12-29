@@ -22,13 +22,21 @@
     // 获取课程列表和问题列表
     List<AdminQuestionServlet.CourseWithQuestionCount> courses = null;
     List<AdminQuestionServlet.QuestionWithAnswers> questions = null;
-    Integer selectedCourseId = (Integer) request.getAttribute("selectedCourseId");
+    Integer selectedCourseId = null;
 
-    // 管理员获取对应的数据
-    courses = (List<AdminQuestionServlet.CourseWithQuestionCount>) request.getAttribute("courses");
-    if (request.getParameter("courseId") != null && !request.getParameter("courseId").isEmpty()) {
-        questions = (List<AdminQuestionServlet.QuestionWithAnswers>) request.getAttribute("questions");
+    // 从请求参数中获取课程ID
+    String courseIdParam = request.getParameter("courseId");
+    if (courseIdParam != null && !courseIdParam.isEmpty()) {
+        try {
+            selectedCourseId = Integer.parseInt(courseIdParam);
+        } catch (NumberFormatException e) {
+            // 如果解析失败，忽略错误
+        }
     }
+    
+    // 从请求属性中获取数据（这些由servlet设置）
+    courses = (List<AdminQuestionServlet.CourseWithQuestionCount>) request.getAttribute("courses");
+    questions = (List<AdminQuestionServlet.QuestionWithAnswers>) request.getAttribute("questions");
 
     // 获取错误信息
     String errorMessage = request.getParameter("error");
@@ -296,7 +304,9 @@
     <div class="message success"><%= successMessage %></div>
     <% } %>
 
-    <% if (questions == null || questions.isEmpty()) { %>
+<%--    <% if (questions == null || questions.isEmpty()) { %>--%>
+    <%-- 修改处1：调整渲染逻辑，基于selectedCourseId判断是否显示课程列表或问题列表（即使问题列表为空，也显示问题视图的no-data），避免删除后跳回课程列表 --%>
+    <% if (selectedCourseId == null) { %>
     <!-- 课程列表 -->
     <div class="course-list">
         <h2>课程列表</h2>
@@ -352,6 +362,7 @@
         } %>
     </h2>
 
+    <%-- 修改处2：在这里添加问题列表的子条件判断，即使questions为空，也显示no-data，而不跳到课程列表 --%>
     <% if (questions != null && !questions.isEmpty()) { %>
     <% for (AdminQuestionServlet.QuestionWithAnswers adminQuestion : questions) { %>
     <%
