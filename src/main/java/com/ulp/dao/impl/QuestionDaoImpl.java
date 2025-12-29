@@ -347,4 +347,79 @@ public class QuestionDaoImpl implements QuestionDao {
         return questions;
     }
 
+    // 管理员功能：获取所有课程及问题数量
+    public List<com.ulp.bean.CourseWithQuestionCount> getAllCoursesWithQuestionCount() {
+        List<com.ulp.bean.CourseWithQuestionCount> courses = new ArrayList<>();
+
+        String sql = "SELECT c.*, u.username as teacher_name FROM courses c " +
+                "LEFT JOIN users u ON c.teacher_id = u.id " +
+                "ORDER BY c.name";
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                CourseModel course = new CourseModel();
+                course.setId(rs.getInt("id"));
+                course.setName(rs.getString("name"));
+                course.setTeacherId(rs.getInt("teacher_id"));
+                course.setDescription(rs.getString("description"));
+                course.setCollege(rs.getString("college"));
+                course.setVisibility(rs.getString("visibility"));
+                course.setCreatedAt(rs.getTimestamp("created_at"));
+
+                String teacherName = rs.getString("teacher_name");
+
+                // 计算该课程的问题数量
+                int questionCount = getQuestionCountByCourseId(course.getId());
+
+                courses.add(new com.ulp.bean.CourseWithQuestionCount(course, teacherName, questionCount));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return courses;
+    }
+
+    // 管理员功能：删除问题（包括相关回答）
+    public boolean deleteQuestionById(int questionId) {
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt1 = conn.prepareStatement("DELETE FROM answers WHERE question_id = ?"); 
+             PreparedStatement pstmt2 = conn.prepareStatement("DELETE FROM questions WHERE id = ?")) {
+
+            // 先删除相关回答
+            pstmt1.setInt(1, questionId);
+            pstmt1.executeUpdate();
+            
+            // 再删除问题
+            pstmt2.setInt(1, questionId);
+            int result = pstmt2.executeUpdate();
+            
+            return result > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 管理员功能：删除回答
+    public boolean deleteAnswerById(int answerId) {
+        String sql = "DELETE FROM answers WHERE id = ?";
+        
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, answerId);
+            int result = pstmt.executeUpdate();
+            
+            return result > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

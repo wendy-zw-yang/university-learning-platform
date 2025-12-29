@@ -159,7 +159,7 @@
                 <h3>学习资源管理</h3>
             </div>
             
-            <div class="dashboard-card">
+            <div class="dashboard-card" onclick="goToQuestions()">
                 <div class="icon">📊</div>
                 <h3>问答内容管理</h3>
             </div>
@@ -179,6 +179,11 @@
 <script>
     function goToCourses() {
         window.location.href='${pageContext.request.contextPath}/admin/courses';
+    }
+</script>
+<script>
+    function goToQuestions() {
+        window.location.href='${pageContext.request.contextPath}/admin/questions';
     }
 </script>
 </html>

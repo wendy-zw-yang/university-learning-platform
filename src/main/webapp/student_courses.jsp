@@ -256,7 +256,6 @@
                     <input type="hidden" name="action" value="unenroll">
                     <input type="hidden" name="courseId" value="<%= course.getId() %>">
                     <button type="submit" class="btn btn-gray">取消课程</button>
-                    <a href="${pageContext.request.contextPath}/questions?courseId=<%= course.getId() %>" class="btn btn-success">提问</a>
 
                 </form>
                 <% } else { %>

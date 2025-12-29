@@ -64,4 +64,28 @@ public class QuestionService {
         QuestionDaoImpl questionDao = new QuestionDaoImpl();
         return questionDao.getEnrolledCourseIds(studentId);
     }
+    
+    // 管理员功能：获取所有课程及问题数量
+    public List<CourseWithQuestionCount> getAllCoursesWithQuestionCount() {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.getAllCoursesWithQuestionCount();
+    }
+    
+    // 管理员功能：根据课程ID获取问题列表
+    public List<QuestionWithAnswers> getQuestionsByCourseIdForAdmin(int courseId) {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.getQuestionsByCourseIdGeneric(courseId);
+    }
+    
+    // 管理员功能：删除问题（包括相关回答）
+    public boolean deleteQuestionById(int questionId) {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.deleteQuestionById(questionId);
+    }
+    
+    // 管理员功能：删除回答
+    public boolean deleteAnswerById(int answerId) {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.deleteAnswerById(answerId);
+    }
 }

@@ -23,4 +23,8 @@ public interface QuestionDao {
     public List<QuestionWithAnswers> getQuestionsByCourseIdGeneric(int courseId);
     public List<Integer> getEnrolledCourseIds(int studentId);
 
-    }
+    // 管理员功能相关方法
+    public List<CourseWithQuestionCount> getAllCoursesWithQuestionCount();
+    public boolean deleteQuestionById(int questionId);
+    public boolean deleteAnswerById(int answerId);
+}
