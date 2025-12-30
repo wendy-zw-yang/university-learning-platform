@@ -27,4 +27,6 @@ public interface QuestionDao {
     public List<CourseWithQuestionCount> getAllCoursesWithQuestionCount();
     public boolean deleteQuestionById(int questionId);
     public boolean deleteAnswerById(int answerId);
+    public boolean updateQuestionContent(int questionId, String newContent);
+    public boolean updateAnswerContent(int answerId, String newContent);
 }

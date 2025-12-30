@@ -88,4 +88,14 @@ public class QuestionService {
         QuestionDaoImpl questionDao = new QuestionDaoImpl();
         return questionDao.deleteAnswerById(answerId);
     }
+
+    public boolean updateQuestionContent(int questionId, String newContent) {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.updateQuestionContent(questionId, newContent);
+    }
+
+    public boolean updateAnswerContent(int answerId, String newContent) {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.updateAnswerContent(answerId, newContent);
+    }
 }

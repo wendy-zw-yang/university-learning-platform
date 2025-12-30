@@ -114,7 +114,9 @@ public class AdminQuestionServlet extends HttpServlet {
         // 处理删除操作
         if ("delete".equals(action)) {
             handleDelete(request, response);
-        } else {
+        } else if ("update".equals(action)) {
+            handleUpdate(request, response);
+        }else {
             // 这个分支不应该被执行，除非action参数有问题
             System.out.println("Invalid action parameter: " + action);
             // 修改处1: 添加else处理无效action，避免doPost结束无响应导致空白
@@ -159,6 +161,46 @@ public class AdminQuestionServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam);
             } else {
                 response.sendRedirect(request.getContextPath() + "/admin/questions");
+            }
+        }
+    }
+
+    private void handleUpdate(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String questionIdParam = request.getParameter("questionId");
+        String answerIdParam = request.getParameter("answerId");
+        String courseIdParam = request.getParameter("courseId");
+        String newContent = request.getParameter("newContent");
+
+        try {
+            QuestionService questionService = new QuestionService();
+
+            if (questionIdParam != null && !questionIdParam.isEmpty() && newContent != null) {
+                // 修改问题
+                int questionId = Integer.parseInt(questionIdParam);
+                boolean success = questionService.updateQuestionContent(questionId, newContent);
+
+                if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/admin/questions");
+                }
+            } else if (answerIdParam != null && !answerIdParam.isEmpty() && newContent != null) {
+                // 修改回答
+                int answerId = Integer.parseInt(answerIdParam);
+                boolean success = questionService.updateAnswerContent(answerId, newContent);
+
+                if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/admin/questions");
+                }
+            }
+        } catch (NumberFormatException e) {
+            if (courseIdParam != null && !courseIdParam.isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/admin/questions?courseId=" + courseIdParam + "&error=参数错误");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/questions?error=参数错误");
             }
         }
     }

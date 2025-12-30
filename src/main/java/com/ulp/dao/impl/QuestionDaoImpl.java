@@ -422,4 +422,38 @@ public class QuestionDaoImpl implements QuestionDao {
         }
     }
 
+    public boolean updateQuestionContent(int questionId, String newContent) {
+        String sql = "UPDATE questions SET content = ? WHERE id = ?";
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newContent);
+            pstmt.setInt(2, questionId);
+
+            int result = pstmt.executeUpdate();
+            return result > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateAnswerContent(int answerId, String newContent) {
+        String sql = "UPDATE answers SET content = ? WHERE id = ?";
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newContent);
+            pstmt.setInt(2, answerId);
+
+            int result = pstmt.executeUpdate();
+            return result > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
