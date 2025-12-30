@@ -9,7 +9,7 @@ public class CourseModel {
     private int id;
     private String name;
     private Integer teacherId;
-    private String description;
+    private String description; // 课程描述
     private String college;
     private String visibility; // "class_only" or "all"
     private Timestamp createdAt;

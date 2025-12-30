@@ -8,6 +8,7 @@
 <%@ page import="java.sql.Timestamp" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="com.ulp.bean.UserModel" %>
+<%@ page import="com.ulp.service.StudentCourseService" %>
 <%
     // 获取当前登录用户
     UserModel userObj = (UserModel)session.getAttribute("user");
@@ -305,8 +306,16 @@
                 <div><%= course.getDescription() %></div>
                 <% } %>
             </a>
-            <% if ("student".equals(role)) { %>
+            <% if ("student".equals(role)) { 
+                // 检查学生是否可以向该课程提问 - 可以向所有学生可见的课程或已选课程提问
+                boolean canAsk = "all".equals(course.getVisibility()) || 
+                                new StudentCourseService().isStudentEnrolled(userObj.getId(), course.getId());
+            %>
+            <% if (canAsk) { %>
             <a href="${pageContext.request.contextPath}/questions?courseId=<%= course.getId() %>" class="btn btn-primary">提问</a>
+            <% } else { %>
+            <button class="btn btn-primary" disabled>未选课且课程不对外开放</button>
+            <% } %>
             <% }%>
         </div>
         <% } %>

@@ -249,17 +249,23 @@ public class QuestionDaoImpl implements QuestionDao {
         // 获取学生已选课程ID列表
         List<Integer> enrolledCourseIds = getEnrolledCourseIds(studentId);
 
-        if (enrolledCourseIds.isEmpty()) {
-            return courses; // 返回空列表
-        }
+        // SQL查询：获取学生已选课程和对所有学生可见的课程
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT c.*, u.username as teacher_name FROM courses c ");
+        sql.append("LEFT JOIN users u ON c.teacher_id = u.id WHERE ");
+        sql.append("(c.visibility = 'all' OR c.id IN (");
 
-        // 构建IN子句的参数
-        String inSql = String.join(",", enrolledCourseIds.stream().map(String::valueOf).toArray(String[]::new));
-        String sql = "SELECT c.*, u.username as teacher_name FROM courses c " +
-                "LEFT JOIN users u ON c.teacher_id = u.id WHERE c.id IN (" + inSql + ")";
+        // 如果学生有选课，则添加已选课程的条件
+        if (!enrolledCourseIds.isEmpty()) {
+            String inSql = String.join(",", enrolledCourseIds.stream().map(String::valueOf).toArray(String[]::new));
+            sql.append("SELECT DISTINCT c.id FROM courses c WHERE c.id IN (").append(inSql).append(")");
+        } else {
+            sql.append("SELECT 0"); // 确保SQL语法正确，当学生未选课时
+        }
+        sql.append(")) ORDER BY c.name");
 
         try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
 
             ResultSet rs = pstmt.executeQuery();
 
