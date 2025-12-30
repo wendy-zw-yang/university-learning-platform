@@ -9,6 +9,7 @@ import com.ulp.dao.impl.CourseDaoImpl;
 import com.ulp.service.AnswerService;
 import com.ulp.service.CourseService;
 import com.ulp.service.QuestionService;
+import com.ulp.service.StudentCourseService;
 import com.ulp.util.DBHelper;
 
 import jakarta.servlet.ServletException;
@@ -28,14 +29,14 @@ import java.sql.Timestamp;
 
 @WebServlet("/questions")
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
-    maxFileSize = 1024 * 1024 * 10,       // 10MB
-    maxRequestSize = 1024 * 1024 * 50     // 50MB
+        fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
+        maxFileSize = 1024 * 1024 * 10,       // 10MB
+        maxRequestSize = 1024 * 1024 * 50     // 50MB
 )
 public class QuestionServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         UserModel user = (UserModel) request.getSession().getAttribute("user");
         if (user == null) {
@@ -55,16 +56,16 @@ public class QuestionServlet extends HttpServlet {
                 request.getRequestDispatcher("/course_question.jsp").forward(request, response);
                 return;
             }
-            
+
             if (questionIdParam == null || questionIdParam.trim().isEmpty()) {
                 request.setAttribute("error", "问题ID不能为空");
                 request.getRequestDispatcher("/course_question.jsp").forward(request, response);
                 return;
             }
-            
+
             try {
                 int questionId = Integer.parseInt(questionIdParam);
-                
+
                 // 这里应该获取问题信息并转发到回答页面
                 // 为简化，我们直接转发到回答页面，页面会处理显示问题详情
                 request.setAttribute("questionId", questionId);
@@ -80,7 +81,7 @@ public class QuestionServlet extends HttpServlet {
                 request.getRequestDispatcher("/student_courses.jsp").forward(request, response);
                 return;
             }
-            
+
             if (courseIdParam == null || courseIdParam.trim().isEmpty()) {
                 request.setAttribute("error", "课程ID不能为空");
                 request.getRequestDispatcher("/student_courses.jsp").forward(request, response);
@@ -89,22 +90,29 @@ public class QuestionServlet extends HttpServlet {
 
             try {
                 int courseId = Integer.parseInt(courseIdParam);
-                
+
                 // 获取课程信息
                 CourseModel course = new CourseService().getCourseById(courseId);
-                
+
                 if (course == null) {
                     request.setAttribute("error", "找不到指定的课程");
                     request.getRequestDispatcher("/student_courses.jsp").forward(request, response);
                     return;
                 }
 
+                // 检查学生是否有权限提问该课程
+                if (!isStudentAllowedToQuestion(user.getId(), course)) {
+                    request.setAttribute("error", "您没有权限向该课程提问");
+                    request.getRequestDispatcher("/student_courses.jsp").forward(request, response);
+                    return;
+                }
+
                 // 设置课程信息到request属性中
                 request.setAttribute("course", course);
-                
+
                 // 转发到提问页面
                 request.getRequestDispatcher("/ask_question.jsp").forward(request, response);
-                
+
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "课程ID格式不正确");
                 request.getRequestDispatcher("/student_courses.jsp").forward(request, response);
@@ -113,7 +121,7 @@ public class QuestionServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         UserModel user = (UserModel) request.getSession().getAttribute("user");
         if (user == null) {
@@ -146,7 +154,7 @@ public class QuestionServlet extends HttpServlet {
 
             try {
                 int questionId = Integer.parseInt(questionIdParam);
-                
+
                 // 获取上传的附件
                 String attachmentPath = null;
                 Part filePart = request.getPart("attachment");
@@ -159,7 +167,7 @@ public class QuestionServlet extends HttpServlet {
                         if(!uploadDir.exists())
                             uploadDir.mkdirs();
                         attachmentPath = "/upload/answers/" + System.currentTimeMillis() + "_" + fileName;
-                        
+
                         // 保存文件到指定目录
                         String uploadPath = getServletContext().getRealPath(attachmentPath);
                         filePart.write(uploadPath);
@@ -183,7 +191,7 @@ public class QuestionServlet extends HttpServlet {
                 } else {
                     request.setAttribute("error", "回答提交失败，请重试");
                 }
-                
+
                 // 重定向回问题页面
                 response.sendRedirect(request.getContextPath() + "/teacher/questions");
             } catch (NumberFormatException e) {
@@ -214,7 +222,22 @@ public class QuestionServlet extends HttpServlet {
 
             try {
                 int courseId = Integer.parseInt(courseIdParam);
-                
+
+                // 获取课程信息
+                CourseModel course = new CourseService().getCourseById(courseId);
+                if (course == null) {
+                    request.setAttribute("error", "找不到指定的课程");
+                    request.getRequestDispatcher("/student_courses.jsp").forward(request, response);
+                    return;
+                }
+
+                // 检查学生是否有权限提问该课程
+                if (!isStudentAllowedToQuestion(user.getId(), course)) {
+                    request.setAttribute("error", "您没有权限向该课程提问");
+                    request.getRequestDispatcher("/student_courses.jsp").forward(request, response);
+                    return;
+                }
+
                 // 获取上传的附件
                 String attachmentPath = null;
                 Part filePart = request.getPart("attachment");
@@ -229,7 +252,7 @@ public class QuestionServlet extends HttpServlet {
                         if(!uploadDir.exists())
                             uploadDir.mkdirs();
                         attachmentPath = "/upload/questions/" + System.currentTimeMillis() + "_" + fileName;
-                        
+
                         // 保存文件到指定目录
                         String uploadPath = getServletContext().getRealPath(attachmentPath);
                         filePart.write(uploadPath);
@@ -268,7 +291,7 @@ public class QuestionServlet extends HttpServlet {
         }
     }
 
-    
+
     // 获取上传文件的文件名
     private String getFileName(Part part) {
         String contentDisposition = part.getHeader("content-disposition");
@@ -280,5 +303,23 @@ public class QuestionServlet extends HttpServlet {
             }
         }
         return null;
+    }
+
+    /**
+     * 检查学生是否有权限向指定课程提问
+     * @param studentId 学生ID
+     * @param course 课程对象
+     * @return 是否有权限
+     */
+    private boolean isStudentAllowedToQuestion(int studentId, CourseModel course) {
+        if ("all".equals(course.getVisibility())) {
+            // 如果课程对所有学生可见，则允许提问
+            return true;
+        } else if ("class_only".equals(course.getVisibility())) {
+            // 如果课程仅对本班学生可见，则检查学生是否已选该课程
+            StudentCourseService studentCourseService = new StudentCourseService();
+            return studentCourseService.isStudentEnrolled(studentId, course.getId());
+        }
+        return false;
     }
 }

@@ -101,4 +101,29 @@ public class CourseService {
 
         return availableCourses;
     }
+
+    /**
+     * 获取学生可以提问的课程列表
+     * @param studentId 学生ID
+     * @return 可提问课程列表
+     */
+    public List<CourseModel> getAvailableCoursesForQuestion(int studentId) {
+        List<CourseModel> allCourses = getAllCourses();
+        List<CourseModel> availableCourses = new ArrayList<>();
+        StudentCourseService studentCourseService = new StudentCourseService();
+
+        for (CourseModel course : allCourses) {
+            if ("all".equals(course.getVisibility())) {
+                // 如果课程对所有学生可见，则直接添加
+                availableCourses.add(course);
+            } else if ("class_only".equals(course.getVisibility())) {
+                // 如果课程仅对本班学生可见，则检查学生是否已选该课程
+                if (studentCourseService.isStudentEnrolled(studentId, course.getId())) {
+                    availableCourses.add(course);
+                }
+            }
+        }
+
+        return availableCourses;
+    }
 }
