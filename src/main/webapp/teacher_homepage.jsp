@@ -178,7 +178,13 @@
         </div>
         <!-- 以下完善新问题通知功能 （实现绑定以及跳转功能）-->
         <div class="message-box">
+            <% if (unansweredQuestionsCount > 0) { %>
+            <h2><a href="${pageContext.request.contextPath}/teacher/questions" style="text-decoration: none; color: #721c24;">
+                您所上课程有 <span class="content"><%= unansweredQuestionsCount %></span> 条未回答问题
+            </a></h2>
+            <% } else { %>
             <h2>您所上课程有 <span class="content"><%= unansweredQuestionsCount %></span> 条未回答问题</h2>
+            <% } %>
         </div>
         <div class="dashboard-grid">
             <div class="dashboard-card" onclick="goToUploadResource()">
