@@ -73,6 +73,24 @@ public class CourseDaoImpl implements CourseDao {
         return courses;
     }
 
+    @Override
+    public List<CourseModel> getUnassignedCourses() {
+        List<CourseModel> courseList = new ArrayList<>();
+        String sql = "SELECT * FROM courses WHERE teacher_id IS NULL OR teacher_id = 0";
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                courseList.add(extractCourseFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return courseList;
+    }
+
     /**
      * 添加新课程
      * @param course 课程对象

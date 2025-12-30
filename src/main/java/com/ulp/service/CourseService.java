@@ -32,6 +32,15 @@ public class CourseService {
     }
 
     /**
+     * 获取未分配给任何教师的课程列表
+     * @return 未分配课程列表
+     */
+    public List<CourseModel> getUnassignedCourses() {
+        CourseDao courseDao = new CourseDaoImpl();
+        return courseDao.getUnassignedCourses();
+    }
+
+    /**
      * 添加新课程
      * @param course 课程对象
      * @return 是否添加成功
@@ -69,5 +78,27 @@ public class CourseService {
     public List<CourseModel> getCoursesByTeacherId(int teacherId) {
         CourseDao courseDao = new CourseDaoImpl();
         return courseDao.getCoursesByTeacherId(teacherId);
+    }
+
+    /**
+     * 获取可用于编辑教师的课程列表（包括教师已分配的课程和未分配的课程）
+     * @param teacherId 教师ID
+     * @return 可用课程列表
+     */
+    public List<CourseModel> getAvailableCoursesForTeacher(int teacherId) {
+        List<CourseModel> allCourses = getAllCourses();
+        List<CourseModel> availableCourses = new ArrayList<>();
+
+        for (CourseModel course : allCourses) {
+            // 添加未分配的课程
+            if (course.getTeacherId() == null || course.getTeacherId() == 0) {
+                availableCourses.add(course);
+            } else if (course.getTeacherId() == teacherId) {
+                // 添加当前教师已分配的课程
+                availableCourses.add(course);
+            }
+        }
+
+        return availableCourses;
     }
 }

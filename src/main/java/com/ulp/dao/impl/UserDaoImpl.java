@@ -49,7 +49,7 @@ public class UserDaoImpl implements UserDao {
     public boolean insertUser(UserModel user) {
         String sql = "INSERT INTO users (username, password, role, email, avatar, profile,title) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             pstmt.setString(1, user.getUsername());
             pstmt.setString(2, user.getPassword());
@@ -59,8 +59,19 @@ public class UserDaoImpl implements UserDao {
             pstmt.setString(6, user.getProfile());
             pstmt.setString(7, user.getTitle());
 
-            int rows = pstmt.executeUpdate();
-            return rows > 0;
+            int result = pstmt.executeUpdate();
+
+            if (result > 0) {
+                // 获取自动生成的ID
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int userId = generatedKeys.getInt(1);
+                        user.setId(userId); // 设置ID到UserModel中
+                        return true;
+                    }
+                }
+            }
+            return false;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

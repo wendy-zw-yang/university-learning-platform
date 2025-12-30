@@ -72,6 +72,37 @@ public class TeacherDaoImpl implements TeacherDao {
     }
 
     /**
+     * 为教师分配课程 - 更新courses表中的teacher_id字段
+     * @param teacherId 教师ID
+     * @param courseIds 课程ID列表
+     * @return 是否分配成功
+     */
+    @Override
+    public boolean assignCoursesToTeacher(int teacherId, List<Integer> courseIds) {
+        if (courseIds == null || courseIds.isEmpty()) {
+            return true;
+        }
+
+        String sql = "UPDATE courses SET teacher_id = ? WHERE id = ?";
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (Integer courseId : courseIds) {
+                pstmt.setInt(1, teacherId);
+                pstmt.setInt(2, courseId);
+                pstmt.addBatch();
+            }
+
+            pstmt.executeBatch();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * 获取所有教师列表
      * @return 教师列表
      */

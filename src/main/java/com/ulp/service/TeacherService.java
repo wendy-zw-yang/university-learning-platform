@@ -29,8 +29,18 @@ public class TeacherService {
         TeacherModel teacher = new TeacherModel();
         UserDao userDao = new UserDaoImpl();
         UserModel user = userDao.findUserById(id);
-        teacher.setUserModel( user);
-        teacher.setCourseList(getCoursesByTeacherId(id));
+        teacher.setUserModel(user);
+
+        // 设置课程列表
+        List<CourseModel> courseList = getCoursesByTeacherId(id);
+        teacher.setCourseList(courseList);
+
+        // 设置课程ID列表
+        List<Integer> courseIdList = new ArrayList<>();
+        for (CourseModel course : courseList) {
+            courseIdList.add(course.getId());
+        }
+        teacher.setCourseIdList(courseIdList);
 
         return teacher;
     }
@@ -101,7 +111,17 @@ public class TeacherService {
      */
     public boolean assignCourses(int teacherId, List<Integer> courseIds) {
         TeacherDao teacherDao = new TeacherDaoImpl();
-        return teacherDao.assignCourses(teacherId, courseIds);
+        return teacherDao.assignCoursesToTeacher(teacherId, courseIds);
+    }
+
+    /**
+     * 移除教师的所有课程关联
+     * @param teacherId 教师ID
+     * @return 是否移除成功
+     */
+    public boolean removeAllCourses(int teacherId) {
+        TeacherDao teacherDao = new TeacherDaoImpl();
+        return teacherDao.removeAllCourses(teacherId);
     }
 
 }

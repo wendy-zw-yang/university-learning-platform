@@ -51,8 +51,8 @@ public class TeacherServlet extends HttpServlet {
             // 显示编辑页面
             showEditPage(request, response);
         } else if ("add".equals(action)) {
-            // 显示添加页面，需要获取所有课程列表
-            List<CourseModel> courses = courseService.getAllCourses();
+            // 显示添加页面，需要获取所有未分配的课程列表
+            List<CourseModel> courses = courseService.getUnassignedCourses();
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
         } else {
@@ -112,7 +112,7 @@ public class TeacherServlet extends HttpServlet {
                 
                 if (teacher != null) {
                     // 获取所有课程列表用于多选
-                    List<CourseModel> courses = courseService.getAllCourses();
+                    List<CourseModel> courses = courseService.getAvailableCoursesForTeacher(id);
                     
                     request.setAttribute("teacher", teacher);
                     request.setAttribute("courses", courses);
@@ -179,13 +179,22 @@ public class TeacherServlet extends HttpServlet {
         teacher.setCourseIdList(courseIds);
         
         boolean success = teacherService.addTeacher(teacher);
-        
+
         if (success) {
+            int teacherId = teacher.getUserModel().getId();
+            // 如果课程ID列表不为空，为教师分配课程
+            if (!courseIds.isEmpty()) {
+                boolean courseAssigned = teacherService.assignCourses(teacherId, courseIds);
+                if (!courseAssigned) {
+                    // 如果课程分配失败，可能需要回滚
+                    System.out.println("警告：课程分配失败");
+                }
+            }
             response.sendRedirect(request.getContextPath() + "/admin/teachers?success=add");
         } else {
             request.setAttribute("error", "添加教师失败，用户名可能已存在");
             request.setAttribute("teacher", teacher);
-            List<CourseModel> courses = courseService.getAllCourses();
+            List<CourseModel> courses = courseService.getAvailableCoursesForTeacher(teacher.getUserModel().getId());
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
         }
@@ -196,9 +205,9 @@ public class TeacherServlet extends HttpServlet {
      */
     private void updateTeacher(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
         String idStr = request.getParameter("id");
         String username = request.getParameter("username");
+        String password = request.getParameter("password");
         String email = request.getParameter("email");
         String avatar = request.getParameter("avatar");
         String profile = request.getParameter("profile");
@@ -206,8 +215,8 @@ public class TeacherServlet extends HttpServlet {
         String[] courseIdsStr = request.getParameterValues("courseIds");
         
         // 验证输入
-        if (idStr == null || idStr.isEmpty() || username == null || username.trim().isEmpty()) {
-            request.setAttribute("error", "教师ID和用户名不能为空");
+        if (idStr == null || idStr.isEmpty() || username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            request.setAttribute("error", "教师ID、用户名和密码不能为空");
             List<CourseModel> courses = courseService.getAllCourses();
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
@@ -220,6 +229,7 @@ public class TeacherServlet extends HttpServlet {
 
             user.setId(Integer.parseInt(idStr));
             user.setUsername(username.trim());
+            user.setPassword(password.trim());
             user.setEmail(email != null ? email.trim() : "");
             user.setAvatar(avatar != null ? avatar.trim() : "");
             user.setProfile(profile != null ? profile.trim() : "");
@@ -240,19 +250,29 @@ public class TeacherServlet extends HttpServlet {
             teacher.setCourseIdList(courseIds);
             
             boolean success = teacherService.updateTeacher(teacher);
-            
+
             if (success) {
+                // 更新课程分配
+                int teacherId = Integer.parseInt(idStr);
+                // 先移除所有现有课程关联
+                teacherService.removeAllCourses(teacherId);
+
+                // 再分配新选择的课程
+                if (!courseIds.isEmpty()) {
+                    teacherService.assignCourses(teacherId, courseIds);
+                }
+
                 response.sendRedirect(request.getContextPath() + "/admin/teachers?success=update");
             } else {
                 request.setAttribute("error", "更新教师失败");
                 request.setAttribute("teacher", teacher);
-                List<CourseModel> courses = courseService.getAllCourses();
+                List<CourseModel> courses = courseService.getAvailableCoursesForTeacher(Integer.parseInt(idStr));
                 request.setAttribute("courses", courses);
                 request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
             }
         } catch (NumberFormatException e) {
             request.setAttribute("error", "无效的教师ID");
-            List<CourseModel> courses = courseService.getAllCourses();
+            List<CourseModel> courses = courseService.getAvailableCoursesForTeacher(Integer.parseInt(idStr));
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
         }

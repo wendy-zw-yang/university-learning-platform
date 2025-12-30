@@ -202,18 +202,17 @@
                        placeholder="请输入用户名">
                 <div class="help-text">教师登录系统使用的用户名</div>
             </div>
-            
-            <% if (!isEdit) { %>
-                <div class="form-group">
-                    <label for="password">密码 <span class="required">*</span></label>
-                    <input type="password" 
-                           id="password" 
-                           name="password" 
-                           required 
-                           placeholder="请输入密码">
-                    <div class="help-text">初始登录密码，建议首次登录后修改</div>
-                </div>
-            <% } %>
+
+            <div class="form-group">
+                <label for="password">密码 <span class="required">*</span></label>
+                <input type="password"
+                       id="password"
+                       name="password"
+                       value="<%= isEdit ? teacher.getUserModel().getPassword() : "" %>"
+                       required
+                       placeholder="请输入密码">
+                <div class="help-text">教师登录系统使用的密码</div>
+            </div>
             
             <div class="form-group">
                 <label for="email">邮箱</label>

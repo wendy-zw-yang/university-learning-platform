@@ -11,6 +11,7 @@ public interface CourseDao {
     public List<CourseModel> getCoursesByTeacherId(int teacherId);
     public CourseModel getCourseById(int courseId);
     public List<CourseModel> getAllCourses();
+    public List<CourseModel> getUnassignedCourses();
     public boolean addCourse(CourseModel course);
     public boolean updateCourse(CourseModel course);
     public boolean deleteCourse(int id);
