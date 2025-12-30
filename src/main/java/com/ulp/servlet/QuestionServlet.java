@@ -155,6 +155,15 @@ public class QuestionServlet extends HttpServlet {
             try {
                 int questionId = Integer.parseInt(questionIdParam);
 
+                // 获取问题信息以获取课程ID
+                QuestionService questionService = new QuestionService();
+                QuestionModel question = questionService.getQuestionById(questionId);
+                if (question == null) {
+                    request.setAttribute("error", "找不到指定的问题");
+                    request.getRequestDispatcher("/answer_question.jsp").forward(request, response);
+                    return;
+                }
+
                 // 获取上传的附件
                 String attachmentPath = null;
                 Part filePart = request.getPart("attachment");
@@ -192,8 +201,8 @@ public class QuestionServlet extends HttpServlet {
                     request.setAttribute("error", "回答提交失败，请重试");
                 }
 
-                // 重定向回问题页面
-                response.sendRedirect(request.getContextPath() + "/teacher/questions");
+                // 重定向回问题所在课程的页面
+                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + question.getCourseId());
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "问题ID格式不正确");
                 request.getRequestDispatcher("/answer_question.jsp").forward(request, response);

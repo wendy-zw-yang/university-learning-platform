@@ -6,9 +6,11 @@ import com.ulp.bean.QuestionModel;
 import com.ulp.dao.QuestionDao;
 import com.ulp.bean.CourseWithQuestionCount;
 import com.ulp.bean.QuestionWithAnswers;
+import com.ulp.service.QuestionService;
 import com.ulp.servlet.TeacherQuestionServlet;
 import com.ulp.util.DBHelper;
 
+import javax.swing.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,13 +69,13 @@ public class QuestionDaoImpl implements QuestionDao {
     }
 
     @Override
-    public List<TeacherQuestionServlet.CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
+    public List<com.ulp.bean.CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
         List<com.ulp.bean.CourseWithQuestionCount> genericCourses = getCoursesByTeacherIdGeneric(teacherId);
         
         // 转换通用类到教师端内部类
-        List<TeacherQuestionServlet.CourseWithQuestionCount> teacherCourses = new ArrayList<>();
+        List<com.ulp.bean.CourseWithQuestionCount> teacherCourses = new ArrayList<>();
         for (com.ulp.bean.CourseWithQuestionCount genericCourse : genericCourses) {
-            teacherCourses.add(new TeacherQuestionServlet.CourseWithQuestionCount(
+            teacherCourses.add(new com.ulp.bean.CourseWithQuestionCount(
                 genericCourse.getCourse(),
                 genericCourse.getTeacherName(),
                 genericCourse.getQuestionCount()
@@ -126,8 +128,8 @@ public class QuestionDaoImpl implements QuestionDao {
 
     // 获取指定课程的问题列表
     @Override
-    public List<TeacherQuestionServlet.QuestionWithAnswers> getQuestionsByCourseId(int courseId) {
-        List<TeacherQuestionServlet.QuestionWithAnswers> questions = new ArrayList<>();
+    public List<com.ulp.bean.QuestionWithAnswers> getQuestionsByCourseId(int courseId) {
+        List<com.ulp.bean.QuestionWithAnswers> questions = new ArrayList<>();
 
         String sql = "SELECT q.*, u.username as student_name FROM questions q " +
                 "LEFT JOIN users u ON q.student_id = u.id " +
@@ -154,7 +156,7 @@ public class QuestionDaoImpl implements QuestionDao {
                 // 获取该问题的所有回答
                 List<AnswerModel> answers = getAnswersByQuestionId(question.getId());
 
-                questions.add(new TeacherQuestionServlet.QuestionWithAnswers(question, studentName, answers));
+                questions.add(new com.ulp.bean.QuestionWithAnswers(question, studentName, answers));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -243,6 +245,7 @@ public class QuestionDaoImpl implements QuestionDao {
         return count;
     }
 
+    @Override
     public List<com.ulp.bean.CourseWithQuestionCount> getCoursesByStudentId(int studentId) {
         List<com.ulp.bean.CourseWithQuestionCount> courses = new ArrayList<>();
 
@@ -294,6 +297,7 @@ public class QuestionDaoImpl implements QuestionDao {
     }
 
     // 获取学生已选课程ID列表
+    @Override
     public List<Integer> getEnrolledCourseIds(int studentId) {
         List<Integer> courseIds = new ArrayList<>();
 
@@ -316,6 +320,7 @@ public class QuestionDaoImpl implements QuestionDao {
     }
 
     // 获取指定课程的问题列表（通用方法，可用于学生和教师端）
+    @Override
     public List<com.ulp.bean.QuestionWithAnswers> getQuestionsByCourseIdGeneric(int courseId) {
         List<com.ulp.bean.QuestionWithAnswers> questions = new ArrayList<>();
 
@@ -354,6 +359,7 @@ public class QuestionDaoImpl implements QuestionDao {
     }
 
     // 管理员功能：获取所有课程及问题数量
+    @Override
     public List<com.ulp.bean.CourseWithQuestionCount> getAllCoursesWithQuestionCount() {
         List<com.ulp.bean.CourseWithQuestionCount> courses = new ArrayList<>();
 
@@ -391,6 +397,7 @@ public class QuestionDaoImpl implements QuestionDao {
     }
 
     // 管理员功能：删除问题（包括相关回答）
+    @Override
     public boolean deleteQuestionById(int questionId) {
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt1 = conn.prepareStatement("DELETE FROM answers WHERE question_id = ?"); 
@@ -411,7 +418,8 @@ public class QuestionDaoImpl implements QuestionDao {
         }
     }
 
-    // 管理员功能：删除回答
+    // 管理员和教师功能：删除回答
+    @Override
     public boolean deleteAnswerById(int answerId) {
         String sql = "DELETE FROM answers WHERE id = ?";
         
@@ -428,6 +436,8 @@ public class QuestionDaoImpl implements QuestionDao {
         }
     }
 
+    // 教师功能：更新问题内容
+    @Override
     public boolean updateQuestionContent(int questionId, String newContent) {
         String sql = "UPDATE questions SET content = ? WHERE id = ?";
 
@@ -445,6 +455,8 @@ public class QuestionDaoImpl implements QuestionDao {
         }
     }
 
+    // 教师功能：更新回答内容
+    @Override
     public boolean updateAnswerContent(int answerId, String newContent) {
         String sql = "UPDATE answers SET content = ? WHERE id = ?";
 
@@ -460,6 +472,32 @@ public class QuestionDaoImpl implements QuestionDao {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // 根据ID获取回答
+    @Override
+    public AnswerModel getAnswerById(int answerId) {
+        String sql = "SELECT * FROM answers WHERE id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, answerId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                AnswerModel answer = new AnswerModel();
+                answer.setId(rs.getInt("id"));
+                answer.setContent(rs.getString("content"));
+                answer.setAttachment(rs.getString("attachment"));
+                answer.setQuestionId(rs.getInt("question_id"));
+                answer.setTeacherId(rs.getInt("teacher_id"));
+                answer.setCreatedAt(rs.getTimestamp("created_at"));
+                return answer;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

@@ -25,12 +25,12 @@ public class QuestionService {
     }
 
     // 根据教师ID获取课程列表
-    public List<TeacherQuestionServlet.CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
+    public List<com.ulp.bean.CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
         QuestionDao questionDao = new QuestionDaoImpl();
         return questionDao.getCoursesByTeacherId(teacherId);
     }
 
-    public List<TeacherQuestionServlet.QuestionWithAnswers> getQuestionsByCourseId(int courseId) {
+    public List<com.ulp.bean.QuestionWithAnswers> getQuestionsByCourseId(int courseId) {
         QuestionDao questionDao = new QuestionDaoImpl();
         return questionDao.getQuestionsByCourseId(courseId);
     }

@@ -7,6 +7,8 @@ import com.ulp.dao.impl.QuestionDaoImpl;
 import com.ulp.dao.impl.AnswerDaoImpl;
 import com.ulp.service.QuestionService;
 import com.ulp.util.DBHelper;
+import com.ulp.bean.QuestionWithAnswers;
+import com.ulp.bean.CourseWithQuestionCount;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,52 +25,6 @@ import java.util.List;
 
 @WebServlet("/teacher/questions")
 public class TeacherQuestionServlet extends HttpServlet {
-    // 用于封装课程和问题数量的内部类
-    public static class CourseWithQuestionCount {
-        private CourseModel course;
-        private String teacherName;
-        private int questionCount;
-        
-        public CourseWithQuestionCount(CourseModel course, String teacherName, int questionCount) {
-            this.course = course;
-            this.teacherName = teacherName;
-            this.questionCount = questionCount;
-        }
-        
-        public CourseModel getCourse() { return course; }
-        public void setCourse(CourseModel course) { this.course = course; }
-        
-        public String getTeacherName() { return teacherName; }
-        public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
-        
-        public int getQuestionCount() { return questionCount; }
-        public void setQuestionCount(int questionCount) { this.questionCount = questionCount; }
-    }
-    
-    // 用于封装问题和回答的内部类
-    public static class QuestionWithAnswers {
-        private QuestionModel question;
-        private String studentName;
-        private List<AnswerModel> answers;
-        
-        public QuestionWithAnswers(QuestionModel question, String studentName, List<AnswerModel> answers) {
-            this.question = question;
-            this.studentName = studentName;
-            this.answers = answers;
-        }
-        
-        public QuestionModel getQuestion() { return question; }
-        public void setQuestion(QuestionModel question) { this.question = question; }
-        
-        public String getStudentName() { return studentName; }
-        public void setStudentName(String studentName) { this.studentName = studentName; }
-        
-        public List<AnswerModel> getAnswers() { return answers; }
-        public void setAnswers(List<AnswerModel> answers) { this.answers = answers; }
-        
-        public boolean hasAnswers() { return answers != null && !answers.isEmpty(); }
-    }
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -130,15 +86,127 @@ public class TeacherQuestionServlet extends HttpServlet {
             request.getRequestDispatcher("/course_question.jsp").forward(request, response);
         }
     }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        UserModel teacher = (UserModel) request.getSession().getAttribute("user");
+        if (teacher == null || !"teacher".equals(teacher.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
 
+        String action = request.getParameter("action");
+        if ("delete".equals(action)) {
+            handleDeleteAnswer(request, response, teacher.getId());
+        } else if ("update".equals(action)) {
+            handleUpdateAnswer(request, response, teacher.getId());
+        } else if ("edit".equals(action)) {
+            showEditAnswerPage(request, response);
+        }
+    }
+
+    // 处理删除回答
+    private void handleDeleteAnswer(HttpServletRequest request, HttpServletResponse response, int teacherId) 
+            throws IOException {
+        try {
+            int answerId = Integer.parseInt(request.getParameter("answerId"));
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            
+            // 验证该回答是否属于该教师
+            QuestionService questionService = new QuestionService();
+            QuestionDaoImpl questionDao = new QuestionDaoImpl();
+            AnswerModel answer = questionDao.getAnswerById(answerId);
+            if (answer != null && answer.getTeacherId() == teacherId) {
+                // 删除回答
+                boolean success = questionService.deleteAnswerById(answerId);
+                
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                            "&success=回答删除成功");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                            "&error=回答删除失败");
+                }
+            } else {
+                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                        "&error=您没有权限删除此回答");
+            }
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/teacher/questions?error=参数格式错误");
+        }
+    }
+
+    // 处理更新回答
+    private void handleUpdateAnswer(HttpServletRequest request, HttpServletResponse response, int teacherId) 
+            throws IOException {
+        try {
+            int answerId = Integer.parseInt(request.getParameter("answerId"));
+            String newContent = request.getParameter("newContent");
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            
+            // 验证该回答是否属于该教师
+            QuestionService questionService = new QuestionService();
+            QuestionDaoImpl questionDao = new QuestionDaoImpl();
+            AnswerModel answer = questionDao.getAnswerById(answerId);
+            if (answer != null && answer.getTeacherId() == teacherId) {
+                // 更新回答
+                boolean success = questionService.updateAnswerContent(answerId, newContent);
+                
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                            "&success=回答更新成功");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                            "&error=回答更新失败");
+                }
+            } else {
+                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                        "&error=您没有权限修改此回答");
+            }
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/teacher/questions?error=参数格式错误");
+        }
+    }
+
+    // 显示编辑回答页面
+    private void showEditAnswerPage(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        UserModel teacher = (UserModel) request.getSession().getAttribute("user");
+        if (teacher == null || !"teacher".equals(teacher.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+
+        try {
+            int answerId = Integer.parseInt(request.getParameter("answerId"));
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            
+            // 验证该回答是否属于该教师
+            QuestionDaoImpl questionDao = new QuestionDaoImpl();
+            AnswerModel answer = questionDao.getAnswerById(answerId);
+            if (answer != null && answer.getTeacherId() == teacher.getId()) {
+                request.setAttribute("answer", answer);
+                request.setAttribute("courseId", courseId);
+                request.getRequestDispatcher("/edit_answer.jsp").forward(request, response);
+            } else {
+                request.setAttribute("error", "您没有权限编辑此回答");
+                doGet(request, response);
+            }
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "参数格式错误");
+            doGet(request, response);
+        }
+    }
+    
     // 根据教师ID获取课程列表
     public List<CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
         QuestionService questionService = new QuestionService();
-        List<CourseWithQuestionCount> genericCourses = questionService.getCoursesByTeacherId(teacherId);
+        List<com.ulp.bean.CourseWithQuestionCount> genericCourses = questionService.getCoursesByTeacherId(teacherId);
         
         // 转换通用类到内部类
         List<CourseWithQuestionCount> teacherCourses = new ArrayList<>();
-        for (CourseWithQuestionCount genericCourse : genericCourses) {
+        for (com.ulp.bean.CourseWithQuestionCount genericCourse : genericCourses) {
             teacherCourses.add(new CourseWithQuestionCount(
                 genericCourse.getCourse(),
                 genericCourse.getTeacherName(),
@@ -181,5 +249,21 @@ public class TeacherQuestionServlet extends HttpServlet {
     private int getQuestionCountByCourseId(int courseId) {
         QuestionService questionService = new QuestionService();
         return questionService.getQuestionCountByCourseId(courseId);
+    }
+
+    // 用于封装课程和问题数量的内部类
+    public static class CourseWithQuestionCount extends com.ulp.bean.CourseWithQuestionCount {
+        public CourseWithQuestionCount(CourseModel course, String teacherName, int questionCount) {
+            super(course, teacherName, questionCount);
+        }
+    }
+
+    // 用于封装问题和回答的内部类
+    public static class QuestionWithAnswers extends com.ulp.bean.QuestionWithAnswers {
+        public QuestionWithAnswers(QuestionModel question, String studentName, List<AnswerModel> answers) {
+            super(question, studentName, answers);
+        }
+
+        public QuestionWithAnswers() { super(null, null, null); }
     }
 }

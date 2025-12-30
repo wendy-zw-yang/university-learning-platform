@@ -229,6 +229,7 @@
             background-color: #e9f4ff;
             border-radius: 4px;
             border-left: 3px solid #007bff;
+            position: relative;
         }
 
         .question-title {
@@ -245,6 +246,40 @@
 
         .attachment-link:hover {
             text-decoration: underline;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .update-btn {
+            position: absolute;
+            top: 10px;
+            right: 100px;
+            background-color: #ffc107;
+            color: #212529;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .update-btn:hover {
+            background-color: #e0a800;
         }
     </style>
 </head>
@@ -396,7 +431,24 @@
             <% if (answers != null && !answers.isEmpty()) { %>
                 <% for (AnswerModel answer : answers) { %>
                 <div class="answer-content">
-                    <%= answer.getContent() %>
+                    <% if ("teacher".equals(role)) { %>
+                        <form method="post" action="${pageContext.request.contextPath}/teacher/questions" style="display: inline;" onsubmit="return confirm('确定要删除这个回答吗？')">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="answerId" value="<%= answer.getId() %>">
+                            <input type="hidden" name="courseId" value="<%= question.getCourseId() %>">
+                            <button type="submit" class="delete-btn">删除回答</button>
+                        </form>
+                        
+                        <form method="post" action="${pageContext.request.contextPath}/teacher/questions" style="display: inline;">
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="answerId" value="<%= answer.getId() %>">
+                            <input type="hidden" name="courseId" value="<%= question.getCourseId() %>">
+                            <button type="submit" class="update-btn">修改回答</button>
+                        </form>
+                    <% } %>
+                    <div id="answer-content-<%= answer.getId() %>">
+                        <%= answer.getContent() %>
+                    </div>
                     <div style="font-size: 12px; color: #666; margin-top: 5px;">
                         教师: 
                         <% if (answer.getTeacherName() != null) { %>
