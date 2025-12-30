@@ -334,7 +334,7 @@
                         <% } %>
                     </div>
                     <div>
-                        <span class="course-count"><%= questionCount %> 个问题</span>
+                        <span class="course-count"><%= questionCount %> 个未回答问题</span>
                     </div>
                 </div>
                 <% if (course.getDescription() != null && !course.getDescription().isEmpty()) { %>
