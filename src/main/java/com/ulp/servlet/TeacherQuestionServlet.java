@@ -123,17 +123,17 @@ public class TeacherQuestionServlet extends HttpServlet {
                 
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
-                            "&success=回答删除成功");
+                            "&success=succeeded");
                 } else {
                     response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
-                            "&error=回答删除失败");
+                            "&error=failed");
                 }
             } else {
                 response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
-                        "&error=您没有权限删除此回答");
+                        "&error=none");
             }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/teacher/questions?error=参数格式错误");
+            response.sendRedirect(request.getContextPath() + "/teacher/questions?error=error");
         }
     }
 
@@ -155,17 +155,17 @@ public class TeacherQuestionServlet extends HttpServlet {
                 
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
-                            "&success=回答更新成功");
+                            "&success=succeeded");
                 } else {
                     response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
-                            "&error=回答更新失败");
+                            "&error=failed");
                 }
             } else {
                 response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
-                        "&error=您没有权限修改此回答");
+                        "&error=none");
             }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/teacher/questions?error=参数格式错误");
+            response.sendRedirect(request.getContextPath() + "/teacher/questions?error=error");
         }
     }
 
