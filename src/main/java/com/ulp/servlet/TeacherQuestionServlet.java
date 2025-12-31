@@ -122,15 +122,18 @@ public class TeacherQuestionServlet extends HttpServlet {
                 boolean success = questionService.deleteAnswerById(answerId);
                 
                 if (success) {
-                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId);
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                            "&success=succeeded");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId);
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                            "&error=failed");
                 }
             } else {
-                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId);
+                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                        "&error=none");
             }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/teacher/questions");
+            response.sendRedirect(request.getContextPath() + "/teacher/questions?error=error");
         }
     }
 
@@ -151,15 +154,18 @@ public class TeacherQuestionServlet extends HttpServlet {
                 boolean success = questionService.updateAnswerContent(answerId, newContent);
                 
                 if (success) {
-                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId);
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                            "&success=succeeded");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId);
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                            "&error=failed");
                 }
             } else {
-                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId);
+                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                        "&error=none");
             }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/teacher/questions");
+            response.sendRedirect(request.getContextPath() + "/teacher/questions?error=error");
         }
     }
 
