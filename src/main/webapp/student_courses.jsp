@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>课程管理 - 大学生学习平台</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -180,6 +181,7 @@
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
 <div class="container">
     <h1>课程管理</h1>
 

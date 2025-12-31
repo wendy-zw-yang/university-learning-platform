@@ -158,7 +158,7 @@
 
         <div class="dashboard-card" onclick="goToResources()">
             <div class="icon">📊</div>
-            <h3>管理个人资源</h3>
+            <h3>个人中心</h3>
         </div>
     </div>
 </div>

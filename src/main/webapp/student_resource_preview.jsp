@@ -39,6 +39,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>资源预览 - <%= resource.getTitle() %> - 学生</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -157,6 +158,7 @@
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
 <div class="container">
     <div class="header">
         <h1>📋 资源预览</h1>

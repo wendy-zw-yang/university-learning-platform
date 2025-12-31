@@ -182,6 +182,10 @@
             border-radius: 12px;
             font-size: 12px;
             align-self: center;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         table {
@@ -267,7 +271,7 @@
                 teacherName = userService.getUsernameById(course.getTeacherId());
             }
         %>
-        <div class="course-item <%= selectedCourseId != null && selectedCourseId.equals(course.getId()) ? "active" : "" %>">
+        <div class="course-item <%= selectedCourseId != null && selectedCourseId.equals(course.getId()) ? "active" : "" %>" style="position: relative;">
             <a href="${pageContext.request.contextPath}/admin/resource?courseId=<%= course.getId() %>" class="course-link">
                 <div class="course-header">
                     <div>
@@ -277,8 +281,8 @@
                         <span> | 教师: <%= teacherName %></span>
                         <% } %>
                     </div>
-                    <div class="course-count"><%= resourceCount %> 个资源</div>
                 </div>
+                <div class="course-count"><%= resourceCount %> 个资源</div>
                 <% if (course.getDescription() != null && !course.getDescription().isEmpty()) { %>
                 <div><%= course.getDescription() %></div>
                 <% } %>
