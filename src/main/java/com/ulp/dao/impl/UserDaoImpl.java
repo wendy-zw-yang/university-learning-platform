@@ -5,18 +5,19 @@ import com.ulp.bean.UserModel;
 import com.ulp.util.DBHelper;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDaoImpl implements UserDao {
-    
     @Override
     public UserModel findByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 return extractUserFromResultSet(rs);
             }
@@ -50,7 +51,7 @@ public class UserDaoImpl implements UserDao {
         String sql = "INSERT INTO users (username, password, role, email, avatar, profile,title) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+
             pstmt.setString(1, user.getUsername());
             pstmt.setString(2, user.getPassword());
             pstmt.setString(3, user.getRole());
@@ -77,17 +78,17 @@ public class UserDaoImpl implements UserDao {
             return false;
         }
     }
-    
+
     @Override
     public UserModel authenticate(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 return extractUserFromResultSet(rs);
             }
@@ -96,16 +97,16 @@ public class UserDaoImpl implements UserDao {
         }
         return null;
     }
-    
+
     @Override
     public boolean existsByUsername(String username) {
         String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 return rs.getInt(1) > 0;
             }
@@ -114,16 +115,16 @@ public class UserDaoImpl implements UserDao {
         }
         return false;
     }
-    
+
     @Override
     public boolean existsByEmail(String email) {
         String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setString(1, email);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 return rs.getInt(1) > 0;
             }
@@ -188,4 +189,29 @@ public class UserDaoImpl implements UserDao {
 
         return user;
     }
+
+    @Override
+    public List<UserModel> getUsersByRole(String role) {
+        List<UserModel> users = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE role = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, role);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                users.add(extractUserFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    @Override
+    public List<UserModel> getAllTeachers() {
+        return getUsersByRole("teacher");
+    }
+
 }

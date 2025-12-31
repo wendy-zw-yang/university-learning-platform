@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.ulp.bean.ResourceModel" %>
 <%@ page import="com.ulp.bean.CourseModel" %>
+<%@ page import="com.ulp.service.UserService" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.sql.Timestamp" %>
 <%@ page import="java.text.SimpleDateFormat" %>
@@ -40,6 +41,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学习资源管理 - 管理员</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -131,12 +133,18 @@
             margin-bottom: 30px;
         }
 
+        .course-list h2 {
+            margin-bottom: 20px;
+        }
+
         .course-item {
             background: #f8f9fa;
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 4px;
             border-left: 4px solid #007bff;
+            display: flex;
+            flex-direction: column;
         }
 
         .course-item:hover {
@@ -151,7 +159,8 @@
         .course-link {
             text-decoration: none;
             color: #333;
-            display: block;
+            display: flex;
+            flex-direction: column;
         }
 
         .course-link:hover {
@@ -162,6 +171,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 5px;
         }
 
         .course-count {
@@ -171,6 +181,7 @@
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 12px;
+            align-self: center;
         }
 
         table {
@@ -219,6 +230,7 @@
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
 <div class="container">
     <div class="header">
         <h1>📝 学习资源管理</h1>
@@ -247,6 +259,13 @@
                     }
                 }
             }
+
+            // 获取教师名称
+            String teacherName = null;
+            if (course.getTeacherId() != null) {
+                UserService userService = new UserService();
+                teacherName = userService.getUsernameById(course.getTeacherId());
+            }
         %>
         <div class="course-item <%= selectedCourseId != null && selectedCourseId.equals(course.getId()) ? "active" : "" %>">
             <a href="${pageContext.request.contextPath}/admin/resource?courseId=<%= course.getId() %>" class="course-link">
@@ -254,11 +273,15 @@
                     <div>
                         <strong><%= course.getName() %></strong>
                         <span>ID: <%= course.getId() %></span>
+                        <% if (teacherName != null) { %>
+                        <span> | 教师: <%= teacherName %></span>
+                        <% } %>
                     </div>
-                    <div>
-                        <span class="course-count"><%= resourceCount %> 个资源</span>
-                    </div>
+                    <div class="course-count"><%= resourceCount %> 个资源</div>
                 </div>
+                <% if (course.getDescription() != null && !course.getDescription().isEmpty()) { %>
+                <div><%= course.getDescription() %></div>
+                <% } %>
             </a>
         </div>
         <% } %>

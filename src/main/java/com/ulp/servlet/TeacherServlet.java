@@ -264,7 +264,7 @@ public class TeacherServlet extends HttpServlet {
 
                 response.sendRedirect(request.getContextPath() + "/admin/teachers?success=update");
             } else {
-                request.setAttribute("error", "更新教师失败");
+                request.setAttribute("error", "更新教师失败，用户名可能已存在");
                 request.setAttribute("teacher", teacher);
                 List<CourseModel> courses = courseService.getAvailableCoursesForTeacher(Integer.parseInt(idStr));
                 request.setAttribute("courses", courses);

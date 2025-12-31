@@ -1,0 +1,63 @@
+/* 导航栏样式 - 使用命名空间避免冲突 */
+.navbar-wrapper {
+    margin-bottom: 20px; /* 在导航栏和页面内容之间添加间距 */
+}
+.navbar-wrapper .navbar {
+    background: #38990b;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.navbar-wrapper .navbar h1 {
+    font-size: 24px;
+    margin: 0;
+    color: white;
+}
+.navbar-wrapper .navbar .user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.navbar-wrapper .navbar .user-info span {
+    background: rgba(255,255,255,0.2);
+    padding: 8px 15px;
+    border-radius: 20px;
+    color: white;
+}
+.navbar-wrapper .navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 5px;
+}
+.navbar-wrapper .navbar a:hover {
+    background: rgba(255,255,255,0.3);
+}
+.navbar-wrapper .badge {
+    display: inline-block;
+    padding: 5px 12px;
+    background: #f5576c;
+    color: white;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* 页面布局基础样式 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}

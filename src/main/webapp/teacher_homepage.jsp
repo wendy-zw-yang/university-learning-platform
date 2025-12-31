@@ -163,14 +163,7 @@
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <h1>🎓 大学学习平台 - 教师工作台</h1>
-        <div class="user-info">
-            <span><span class="badge">教师</span> <%= user.getUsername() %></span>
-            <a href="<%= request.getContextPath() %>/profile">个人资料</a>
-            <a href="<%= request.getContextPath() %>/logout">退出登录</a>
-        </div>
-    </div>
+<%@ include file="navbar.jsp" %>
     
     <div class="container">
         <div class="welcome-card">

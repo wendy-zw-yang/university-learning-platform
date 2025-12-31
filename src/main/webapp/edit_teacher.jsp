@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= request.getAttribute("teacher") != null ? "编辑教师" : "添加教师" %> - 大学生学习平台</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -170,6 +171,7 @@
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
     <div class="container">
         <%
             TeacherModel teacher = (TeacherModel) request.getAttribute("teacher");
@@ -237,16 +239,6 @@
                 <textarea id="profile" 
                           name="profile" 
                           placeholder="请输入教师的个人简介、研究方向等"><%= isEdit && teacher.getUserModel().getProfile() != null ? teacher.getUserModel().getProfile() : "" %></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="avatar">头像URL</label>
-                <input type="text" 
-                       id="avatar" 
-                       name="avatar" 
-                       value="<%= isEdit && teacher.getUserModel().getAvatar() != null ? teacher.getUserModel().getAvatar() : "" %>"
-                       placeholder="请输入头像图片的URL地址">
-                <div class="help-text">头像图片的网络地址或服务器路径</div>
             </div>
             
             <div class="form-group">

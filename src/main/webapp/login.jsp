@@ -133,7 +133,7 @@
         </form>
         
         <div class="footer-text">
-            还没有账号？ <a href="<%= request.getContextPath() %>/jsp/general/register.jspregister.jsp">立即注册</a>
+            还没有账号？ <a href="<%= request.getContextPath() %>/register.jsp">立即注册</a>
         </div>
     </div>
 </body>

@@ -53,6 +53,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>问答内容管理 - 管理员</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -156,6 +157,10 @@
             margin-bottom: 30px;
         }
 
+        .course-list h2 {
+            margin-bottom: 20px;
+        }
+
         .course-item {
             background: #f8f9fa;
             padding: 15px;
@@ -163,8 +168,7 @@
             border-radius: 4px;
             border-left: 4px solid #007bff;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
         }
 
         .course-item:hover {
@@ -179,8 +183,8 @@
         .course-link {
             text-decoration: none;
             color: #333;
-            display: block;
-            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .course-link:hover {
@@ -191,6 +195,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 5px;
         }
 
         .course-count {
@@ -200,6 +205,11 @@
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 12px;
+            align-self: center;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         table {
@@ -315,6 +325,7 @@
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
 <div class="container">
     <div class="header">
         <h1>💬 问答内容管理</h1>
@@ -343,7 +354,7 @@
             String teacherName = adminCourse.getTeacherName();
             int questionCount = adminCourse.getQuestionCount();
         %>
-        <div class="course-item">
+        <div class="course-item" style="position: relative;">
             <a href="${pageContext.request.contextPath}/admin/questions?courseId=<%= course.getId() %>" class="course-link">
                 <div class="course-header">
                     <div>
@@ -353,10 +364,8 @@
                         <span> | 教师: <%= teacherName %></span>
                         <% } %>
                     </div>
-                    <div>
-                        <span class="course-count"><%= questionCount %> 个问题</span>
-                    </div>
                 </div>
+                <div class="course-count"><%= questionCount %> 个问题</div>
                 <% if (course.getDescription() != null && !course.getDescription().isEmpty()) { %>
                 <div><%= course.getDescription() %></div>
                 <% } %>
@@ -441,51 +450,53 @@
             <strong>教师回答:</strong>
             <% if (answers != null && !answers.isEmpty()) { %>
             <% for (AnswerModel answer : answers) { %>
-            <div class="answer-content">
-                <form method="post" action="${pageContext.request.contextPath}/admin/questions" style="display: inline;" onsubmit="return confirm('确定要删除这个回答吗？')">
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="answerId" value="<%= answer.getId() %>">
-                    <input type="hidden" name="courseId" value="<%= selectedCourseId %>">
-                    <button type="submit" class="delete-btn">删除回答</button>
-                </form>
-
-                <!-- 修改按钮 -->
-                <button type="button" class="update-btn" onclick="showUpdateAnswerForm(<%= answer.getId() %>, '<%= answer.getContent().replace("'", "\\'") %>')">修改回答</button>
-
-                <!-- 修改表单，初始隐藏 -->
-                <div id="update-answer-form-<%= answer.getId() %>" style="display: none; margin-top: 10px; padding: 10px; background-color: #e0e0e0; border-radius: 4px;">
-                    <form method="post" action="${pageContext.request.contextPath}/admin/questions" style="display: inline;">
-                        <input type="hidden" name="action" value="update">
+            <div class="answer-content" style="display: flex; align-items: center;">
+                <div style="flex: 1;">
+                    <form method="post" action="${pageContext.request.contextPath}/admin/questions" style="display: inline;" onsubmit="return confirm('确定要删除这个回答吗？')">
+                        <input type="hidden" name="action" value="delete">
                         <input type="hidden" name="answerId" value="<%= answer.getId() %>">
                         <input type="hidden" name="courseId" value="<%= selectedCourseId %>">
-                        <textarea name="newContent" rows="4" cols="50" class="update-textarea"><%= answer.getContent() %></textarea><br>
-                        <button type="submit" class="btn btn-primary" style="margin-top: 5px;">确认</button>
-                        <button type="button" class="btn btn-secondary" style="margin-top: 5px;" onclick="hideUpdateAnswerForm(<%= answer.getId() %>)">取消</button>
+                        <button type="submit" class="delete-btn">删除回答</button>
                     </form>
-                </div>
 
-                <div id="answer-content-<%= answer.getId() %>">
-                    <%= answer.getContent() %>
+                    <!-- 修改按钮 -->
+                    <button type="button" class="update-btn" onclick="showUpdateAnswerForm(<%= answer.getId() %>, '<%= answer.getContent().replace("'", "\\'") %>')">修改回答</button>
+
+                    <!-- 修改表单，初始隐藏 -->
+                    <div id="update-answer-form-<%= answer.getId() %>" style="display: none; margin-top: 10px; padding: 10px; background-color: #e0e0e0; border-radius: 4px;">
+                        <form method="post" action="${pageContext.request.contextPath}/admin/questions" style="display: inline;">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="answerId" value="<%= answer.getId() %>">
+                            <input type="hidden" name="courseId" value="<%= selectedCourseId %>">
+                            <textarea name="newContent" rows="4" cols="50" class="update-textarea"><%= answer.getContent() %></textarea><br>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 5px;">确认</button>
+                            <button type="button" class="btn btn-secondary" style="margin-top: 5px;" onclick="hideUpdateAnswerForm(<%= answer.getId() %>)">取消</button>
+                        </form>
+                    </div>
+
+                    <div id="answer-content-<%= answer.getId() %>">
+                        <%= answer.getContent() %>
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        教师:
+                        <% if (answer.getTeacherName() != null) { %>
+                        <%= answer.getTeacherName() %>
+                        <% } else { %>
+                        ID <%= answer.getTeacherId() %>
+                        <% } %> |
+                        时间: <%= answer.getCreatedAt() != null ? dateFormat.format(answer.getCreatedAt()) : "-" %>
+                    </div>
+                    <% if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) { %>
+                    <div>
+                        <a href="<%= request.getContextPath() + answer.getAttachment() %>"
+                           class="attachment-link" target="_blank">附件: <%= answer.getAttachment().substring(answer.getAttachment().lastIndexOf('/') + 1) %></a>
+                    </div>
+                    <% } %>
                 </div>
-                <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                    教师:
-                    <% if (answer.getTeacherName() != null) { %>
-                    <%= answer.getTeacherName() %>
-                    <% } else { %>
-                    ID <%= answer.getTeacherId() %>
-                    <% } %> |
-                    时间: <%= answer.getCreatedAt() != null ? dateFormat.format(answer.getCreatedAt()) : "-" %>
-                </div>
-                <% if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) { %>
-                <div>
-                    <a href="<%= request.getContextPath() + answer.getAttachment() %>"
-                       class="attachment-link" target="_blank">附件: <%= answer.getAttachment().substring(answer.getAttachment().lastIndexOf('/') + 1) %></a>
-                </div>
-                <% } %>
             </div>
             <% } %>
             <% } else { %>
-            <div style="color: #dc3545; font-style: italic;">暂无回答</div>
+            <div style="color: #dc3545; font-style: italic; margin-top: 10px;">暂无回答</div>
             <% } %>
         </div>
     </div>

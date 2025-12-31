@@ -1,6 +1,9 @@
 package com.ulp.servlet;
 
 import com.ulp.bean.CourseModel;
+import com.ulp.bean.UserModel;
+import com.ulp.dao.UserDao;
+import com.ulp.dao.impl.UserDaoImpl;
 import com.ulp.service.CourseService;
 
 import jakarta.servlet.ServletException;
@@ -17,27 +20,29 @@ import java.util.List;
  */
 @WebServlet("/admin/courses")
 public class AdminCourseServlet extends HttpServlet {
-    
+
     private CourseService courseService;
+    private UserDao userDao;
 
     @Override
     public void init() throws ServletException {
         courseService = new CourseService();
+        userDao = new UserDaoImpl();
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         // 检查用户是否登录且为管理员
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
-        
+
         String action = request.getParameter("action");
-        
+
         if (action == null) {
             // 默认显示课程列表
             showCourseList(request, response);
@@ -53,21 +58,21 @@ public class AdminCourseServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
-        
+
         // 检查用户是否登录且为管理员
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
-        
+
         String action = request.getParameter("action");
-        
+
         if ("add".equals(action)) {
             addCourse(request, response);
         } else if ("update".equals(action)) {
@@ -82,9 +87,9 @@ public class AdminCourseServlet extends HttpServlet {
     /**
      * 显示课程列表
      */
-    private void showCourseList(HttpServletRequest request, HttpServletResponse response) 
+    private void showCourseList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         List<CourseModel> courses = courseService.getAllCourses();
         request.setAttribute("courses", courses);
         request.getRequestDispatcher("/courses.jsp").forward(request, response);
@@ -93,15 +98,15 @@ public class AdminCourseServlet extends HttpServlet {
     /**
      * 显示编辑页面
      */
-    private void showEditPage(HttpServletRequest request, HttpServletResponse response) 
+    private void showEditPage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String idStr = request.getParameter("id");
         if (idStr != null && !idStr.isEmpty()) {
             try {
                 int id = Integer.parseInt(idStr);
                 CourseModel course = courseService.getCourseById(id);
-                
+
                 if (course != null) {
                     request.setAttribute("course", course);
                     request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
@@ -121,39 +126,59 @@ public class AdminCourseServlet extends HttpServlet {
     /**
      * 添加课程
      */
-    private void addCourse(HttpServletRequest request, HttpServletResponse response) 
+    private void addCourse(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String name = request.getParameter("name");
         String teacherIdStr = request.getParameter("teacherId");
         String description = request.getParameter("description");
         String college = request.getParameter("college");
         String visibility = request.getParameter("visibility");
-        
+
         // 验证输入
         if (name == null || name.trim().isEmpty()) {
             request.setAttribute("error", "课程名称不能为空");
             request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
             return;
         }
-        
+
         CourseModel course = new CourseModel();
         course.setName(name.trim());
-        
+
+        // 验证教师ID
         if (teacherIdStr != null && !teacherIdStr.isEmpty()) {
             try {
-                course.setTeacherId(Integer.parseInt(teacherIdStr));
+                int teacherId = Integer.parseInt(teacherIdStr);
+
+                // 验证教师是否存在且为教师角色
+                UserModel teacher = userDao.findUserById(teacherId);
+                if (teacher == null) {
+                    request.setAttribute("error", "指定的教师ID不存在");
+                    request.setAttribute("course", course);
+                    request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
+                    return;
+                } else if (!"teacher".equals(teacher.getRole())) {
+                    request.setAttribute("error", "指定的用户不是教师角色");
+                    request.setAttribute("course", course);
+                    request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
+                    return;
+                }
+
+                course.setTeacherId(teacherId);
             } catch (NumberFormatException e) {
-                course.setTeacherId(null);
+                request.setAttribute("error", "教师ID格式不正确");
+                request.setAttribute("course", course);
+                request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
+                return;
             }
         }
-        
+
         course.setDescription(description != null ? description.trim() : "");
         course.setCollege(college != null ? college.trim() : "");
         course.setVisibility(visibility != null ? visibility : "all");
-        
+
         boolean success = courseService.addCourse(course);
-        
+
         if (success) {
             response.sendRedirect(request.getContextPath() + "/admin/courses?success=add");
         } else {
@@ -166,42 +191,64 @@ public class AdminCourseServlet extends HttpServlet {
     /**
      * 更新课程
      */
-    private void updateCourse(HttpServletRequest request, HttpServletResponse response) 
+    private void updateCourse(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String idStr = request.getParameter("id");
         String name = request.getParameter("name");
         String teacherIdStr = request.getParameter("teacherId");
         String description = request.getParameter("description");
         String college = request.getParameter("college");
         String visibility = request.getParameter("visibility");
-        
+
         // 验证输入
         if (idStr == null || idStr.isEmpty() || name == null || name.trim().isEmpty()) {
             request.setAttribute("error", "课程ID和名称不能为空");
             request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
             return;
         }
-        
+
         try {
             CourseModel course = new CourseModel();
             course.setId(Integer.parseInt(idStr));
             course.setName(name.trim());
-            
+
+            // 验证教师ID
             if (teacherIdStr != null && !teacherIdStr.isEmpty()) {
                 try {
-                    course.setTeacherId(Integer.parseInt(teacherIdStr));
+                    int teacherId = Integer.parseInt(teacherIdStr);
+
+                    // 验证教师是否存在且为教师角色
+                    UserModel teacher = userDao.findUserById(teacherId);
+                    if (teacher == null) {
+                        request.setAttribute("error", "指定的教师ID不存在");
+                        request.setAttribute("course", course);
+                        request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
+                        return;
+                    } else if (!"teacher".equals(teacher.getRole())) {
+                        request.setAttribute("error", "指定的用户不是教师角色");
+                        request.setAttribute("course", course);
+                        request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
+                        return;
+                    }
+
+                    course.setTeacherId(teacherId);
                 } catch (NumberFormatException e) {
-                    course.setTeacherId(null);
+                    request.setAttribute("error", "教师ID格式不正确");
+                    request.setAttribute("course", course);
+                    request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
+                    return;
                 }
+            } else {
+                course.setTeacherId(null);
             }
-            
+
             course.setDescription(description != null ? description.trim() : "");
             course.setCollege(college != null ? college.trim() : "");
             course.setVisibility(visibility != null ? visibility : "all");
-            
+
             boolean success = courseService.updateCourse(course);
-            
+
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/admin/courses?success=update");
             } else {
@@ -218,16 +265,16 @@ public class AdminCourseServlet extends HttpServlet {
     /**
      * 删除课程
      */
-    private void deleteCourse(HttpServletRequest request, HttpServletResponse response) 
+    private void deleteCourse(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String idStr = request.getParameter("id");
-        
+
         if (idStr != null && !idStr.isEmpty()) {
             try {
                 int id = Integer.parseInt(idStr);
                 boolean success = courseService.deleteCourse(id);
-                
+
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/admin/courses?success=delete");
                 } else {
