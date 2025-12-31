@@ -152,51 +152,57 @@
         .course-list {
             margin-bottom: 30px;
         }
+        .course-list h2 {
+            margin-bottom: 16px;
+        }
 
+        /* 课程列表项整体样式 */
         .course-item {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 15px 16px;
             margin-bottom: 10px;
             border-radius: 4px;
             border-left: 4px solid #007bff;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: stretch;
+            position: relative;
         }
-
         .course-item:hover {
             background: #e9ecef;
         }
-
         .course-item.active {
             background: #d1ecf1;
             border-left: 4px solid #17a2b8;
         }
-
+        /* 课程链接内容块 */
         .course-link {
             text-decoration: none;
-            color: #333;
-            display: block;
+            color: #212529;
             flex: 1;
-        }
-
-        .course-link:hover {
-            color: #007bff;
-        }
-
-        .course-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            justify-content: center;
         }
-
+        /* 右侧资源气泡和按钮 */
+        .right-controls {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            margin-left: 24px;
+        }
         .course-count {
             display: inline-block;
             background-color: #17a2b8;
             color: white;
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 13px;
+            align-self: center;
+            margin-right: 12px;
+        }
+        .btn-upload {
+            min-width: 80px;
         }
 
         table {
@@ -236,6 +242,18 @@
             border-radius: 4px;
             font-size: 12px;
             margin-left: 10px;
+        }
+        .course-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0;
+        }
+
+        .course-header strong {
+            font-size: 18px;
+            font-weight: bold;
+            color: #222;
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -352,20 +370,22 @@
                     }
                 }
             }
+            // 获取教师名称
+            String teacherName = null;
+            if (course.getTeacherId() != null) {
+                teacherName = userService.getUsernameById(course.getTeacherId());
+            }
         %>
         <div class="course-item <%= selectedCourseId != null && selectedCourseId.equals(course.getId()) ? "active" : "" %>">
             <a href="${pageContext.request.contextPath}/student/resource?courseId=<%= course.getId() %>" class="course-link">
                 <div class="course-header">
-                    <div>
-                        <strong><%= course.getName() %></strong>
-                        <span>ID: <%= course.getId() %></span>
-                    </div>
-                    <div>
-                        <span class="course-count"><%= resourceCount %> 个资源</span>
-                    </div>
+                    <strong><%= course.getName() %></strong>
                 </div>
             </a>
-            <a href="${pageContext.request.contextPath}/student/edit_resources?courseId=<%= course.getId() %>" class="btn btn-primary">上传资源</a>
+            <div class="right-controls">
+                <span class="course-count"><%= resourceCount %> 个资源</span>
+                <a href="${pageContext.request.contextPath}/student/edit_resources?courseId=<%= course.getId() %>" class="btn btn-primary btn-upload">上传资源</a>
+            </div>
         </div>
         <% } %>
         <% } else { %>
