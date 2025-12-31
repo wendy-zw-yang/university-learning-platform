@@ -176,16 +176,6 @@ public class StudentResourceServlet extends HttpServlet {
                 return;
             }
 
-            // 验证学生是否有权限上传到该课程（即该课程是否属于当前学生已选的课程）
-            List<Integer> enrolledCourseIds = studentCourseService.getEnrolledCourseIds(uploaderId);
-            boolean hasPermission = enrolledCourseIds.contains(courseId);
-
-            if (!hasPermission) {
-                request.setAttribute("error", "您没有权限上传资源到此课程！只能上传到您已选的课程。");
-                forwardToUploadPage(request, response);
-                return;
-            }
-
             // 获取上传的文件
             Part filePart = request.getPart("file");
             if (filePart == null || filePart.getSize() == 0) {

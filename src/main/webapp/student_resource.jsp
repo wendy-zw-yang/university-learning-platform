@@ -255,6 +255,21 @@
             color: #222;
             margin-right: 10px;
         }
+
+        .course-header span {
+            font-size: 16px;
+            font-weight: normal;
+            color: #666;
+            margin-left: 6px;
+        }
+
+        .course-desc {
+            color: #888;
+            font-size: 14px;
+            margin-top: 4px;
+            margin-left: 2px;
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
@@ -380,7 +395,14 @@
             <a href="${pageContext.request.contextPath}/student/resource?courseId=<%= course.getId() %>" class="course-link">
                 <div class="course-header">
                     <strong><%= course.getName() %></strong>
+                    <span>ID: <%= course.getId() %></span>
+                    <% if (teacherName != null) { %>
+                    <span> | 教师: <%= teacherName %></span>
+                    <% } %>
                 </div>
+                <% if (course.getDescription() != null && !course.getDescription().isEmpty()) { %>
+                <div class="course-desc"><%= course.getDescription() %></div>
+                <% } %>
             </a>
             <div class="right-controls">
                 <span class="course-count"><%= resourceCount %> 个资源</span>

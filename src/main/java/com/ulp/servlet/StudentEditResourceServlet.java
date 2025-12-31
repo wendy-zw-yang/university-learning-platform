@@ -59,25 +59,6 @@ public class StudentEditResourceServlet extends HttpServlet {
             int courseId = Integer.parseInt(courseIdParam);
             UserModel user = (UserModel) userObj;
 
-            // 验证学生是否有权限访问该课程（即该课程是否为公开课程或学生已选的课程）
-            List<Integer> enrolledCourseIds = studentCourseService.getEnrolledCourseIds(user.getId());
-            List<CourseModel> allCourses = courseService.getAllCourses();
-
-            boolean hasPermission = false;
-            for (CourseModel course : allCourses) {
-                if (course.getId() == courseId &&
-                        ("all".equals(course.getVisibility()) || enrolledCourseIds.contains(courseId))) {
-                    hasPermission = true;
-                    break;
-                }
-            }
-
-            if (!hasPermission) {
-                request.setAttribute("error", "您没有权限访问此课程！");
-                request.getRequestDispatcher("/student_resource.jsp").forward(request, response);
-                return;
-            }
-
             // 获取课程信息
             CourseModel course = courseService.getCourseById(courseId);
             if (course != null) {
