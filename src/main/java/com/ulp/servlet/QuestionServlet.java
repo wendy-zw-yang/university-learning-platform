@@ -10,6 +10,7 @@ import com.ulp.service.AnswerService;
 import com.ulp.service.CourseService;
 import com.ulp.service.QuestionService;
 import com.ulp.service.StudentCourseService;
+import com.ulp.service.NotificationService;
 import com.ulp.util.DBHelper;
 
 import jakarta.servlet.ServletException;
@@ -196,6 +197,13 @@ public class QuestionServlet extends HttpServlet {
                 boolean success = answerService.addAnswer(answer);
 
                 if (success) {
+                    // 创建回答通知给提问的学生
+                    NotificationService notificationService = new NotificationService();
+                    String message = "您在课程 " + question.getCourseId() + " 中的问题 \"" +
+                            (question.getTitle().length() > 20 ? question.getTitle().substring(0, 20) + "..." : question.getTitle()) +
+                            "\" 已被回答";
+                    notificationService.createNotification(question.getStudentId(), "answer", message, questionId);
+
                     request.setAttribute("success", "回答提交成功！");
                 } else {
                     request.setAttribute("error", "回答提交失败，请重试");
@@ -299,6 +307,7 @@ public class QuestionServlet extends HttpServlet {
             }
         }
     }
+
 
 
     // 获取上传文件的文件名

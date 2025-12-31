@@ -72,20 +72,44 @@ public class StudentQuestionServlet extends HttpServlet {
     }
 
     // 根据学生ID获取课程列表
-    private List<CourseWithQuestionCount> getCoursesByStudentId(int studentId) {
+    public List<CourseWithQuestionCount> getCoursesByStudentId(int studentId) {
         QuestionService questionService = new QuestionService();
         List<com.ulp.bean.CourseWithQuestionCount> genericCourses = questionService.getCoursesByStudentId(studentId);
-        
-        // 转换通用类到内部类
+
+        // 转换通用类到内部类，并重新计算计数（未读回答数量）
         List<CourseWithQuestionCount> studentCourses = new ArrayList<>();
         for (com.ulp.bean.CourseWithQuestionCount genericCourse : genericCourses) {
+            // 计算该课程中学生未读的回答数量
+            int unreadAnswersCount = getUnreadAnswersCountByCourseId(studentId, genericCourse.getCourse().getId());
             studentCourses.add(new CourseWithQuestionCount(
-                genericCourse.getCourse(),
-                genericCourse.getTeacherName(),
-                genericCourse.getQuestionCount()
+                    genericCourse.getCourse(),
+                    genericCourse.getTeacherName(),
+                    unreadAnswersCount  // 用未读回答数量替换原来的总问题数
             ));
         }
         return studentCourses;
+    }
+
+    public int getUnreadAnswersCountByCourseId(int studentId, int courseId) {
+        String sql = "SELECT COUNT(*) FROM notifications n " +
+                "JOIN questions q ON n.related_id = q.id " +
+                "WHERE q.student_id = ? AND q.course_id = ? " +
+                "AND n.type = 'answer' AND n.is_read = false";
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, studentId);
+            pstmt.setInt(2, courseId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
     
     // 获取学生已选课程ID列表

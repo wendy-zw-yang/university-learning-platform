@@ -9,6 +9,7 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="com.ulp.bean.UserModel" %>
 <%@ page import="com.ulp.service.StudentCourseService" %>
+<%@ page import="com.ulp.service.NotificationService" %>
 <%
     // 获取当前登录用户
     UserModel userObj = (UserModel)session.getAttribute("user");
@@ -19,7 +20,7 @@
     }
 
     String role = userObj.getRole();
-    
+
     // 获取课程列表和问题列表
     List<?> courses = null;
     List<?> questions = null;
@@ -40,6 +41,30 @@
 
     // 格式化日期的工具
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    // 如果是学生查看课程的问题列表，标记该课程的未读回答通知为已读
+    if ("student".equals(role) && selectedCourseId != null) {
+        NotificationService notificationService = new NotificationService();
+        // 获取该课程中学生未读的回答通知并标记为已读
+        String sql = "SELECT n.id FROM notifications n " +
+                "JOIN questions q ON n.related_id = q.id " +
+                "WHERE q.student_id = ? AND q.course_id = ? " +
+                "AND n.type = 'answer' AND n.is_read = false";
+
+        try (java.sql.Connection conn = com.ulp.util.DBHelper.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, userObj.getId());
+            pstmt.setInt(2, selectedCourseId);
+            java.sql.ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                notificationService.markAsRead(rs.getInt("id"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 %>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -109,12 +134,12 @@
         .btn-secondary:hover {
             background-color: #5a6268;
         }
-        
+
         .btn-answer {
             background-color: #28a745;
             color: white;
         }
-        
+
         .btn-answer:hover {
             background-color: #218838;
         }
@@ -247,7 +272,7 @@
         .attachment-link:hover {
             text-decoration: underline;
         }
-        
+
         .delete-btn {
             position: absolute;
             top: 10px;
@@ -309,7 +334,7 @@
             CourseModel course = null;
             String teacherName = null;
             int questionCount = 0;
-            
+
             // 根据用户角色获取相应类型的对象
             if ("student".equals(role)) {
                 StudentQuestionServlet.CourseWithQuestionCount studentCourse = (StudentQuestionServlet.CourseWithQuestionCount) courseObj;
@@ -334,17 +359,21 @@
                         <% } %>
                     </div>
                     <div>
+                        <% if ("teacher".equals(role)) { %>
                         <span class="course-count"><%= questionCount %> 个未回答问题</span>
+                        <% } else { %>
+                        <span class="course-count"><%= questionCount %> 个未读回答</span>
+                        <% } %>
                     </div>
                 </div>
                 <% if (course.getDescription() != null && !course.getDescription().isEmpty()) { %>
                 <div><%= course.getDescription() %></div>
                 <% } %>
             </a>
-            <% if ("student".equals(role)) { 
+            <% if ("student".equals(role)) {
                 // 检查学生是否可以向该课程提问 - 可以向所有学生可见的课程或已选课程提问
-                boolean canAsk = "all".equals(course.getVisibility()) || 
-                                new StudentCourseService().isStudentEnrolled(userObj.getId(), course.getId());
+                boolean canAsk = "all".equals(course.getVisibility()) ||
+                        new StudentCourseService().isStudentEnrolled(userObj.getId(), course.getId());
             %>
             <% if (canAsk) { %>
             <a href="${pageContext.request.contextPath}/questions?courseId=<%= course.getId() %>" class="btn btn-primary">提问</a>
@@ -365,7 +394,7 @@
     <h2>
         <a href="${pageContext.request.contextPath}/<%= "teacher".equals(role) ? "teacher" : "student" %>/questions" style="text-decoration: none; color: #007bff;">&larr; 返回课程列表</a>
         <br><br>
-        课程: 
+        课程:
         <% if (courses != null) {
             for (Object courseObj : courses) {
                 Object courseWithCount = courseObj;
@@ -380,11 +409,11 @@
                 if (course.getId() == selectedCourseId) {
         %>
         <strong><%= course.getName() %></strong>
-        <% 
-                    break;
+        <%
+                        break;
+                    }
                 }
-            }
-        } %>
+            } %>
     </h2>
 
     <% if (questions != null && !questions.isEmpty()) { %>
@@ -393,7 +422,7 @@
         QuestionModel question = null;
         String studentName = null;
         List<AnswerModel> answers = null;
-        
+
         // 根据用户角色获取相应类型的对象
         if ("student".equals(role)) {
             StudentQuestionServlet.QuestionWithAnswers studentQuestion = (StudentQuestionServlet.QuestionWithAnswers) questionObj;
@@ -411,7 +440,7 @@
         <div class="question-title">
             <%= question.getTitle() %>
             <span style="font-weight: normal; color: #666; font-size: 14px; margin-left: 10px;">
-                学生: <%= studentName %> | 
+                学生: <%= studentName %> |
                 时间: <%= question.getCreatedAt() != null ? dateFormat.format(question.getCreatedAt()) : "-" %>
             </span>
         </div>
@@ -420,57 +449,57 @@
         </div>
         <% if (question.getAttachment() != null && !question.getAttachment().isEmpty()) { %>
         <div>
-            <a href="<%= request.getContextPath() + question.getAttachment() %>" 
+            <a href="<%= request.getContextPath() + question.getAttachment() %>"
                class="attachment-link" target="_blank">附件: <%= question.getAttachment().substring(question.getAttachment().lastIndexOf('/') + 1) %></a>
         </div>
         <% } %>
-        
+
         <!-- 显示回答 -->
         <div style="margin-top: 15px;">
             <strong>教师回答:</strong>
             <% if (answers != null && !answers.isEmpty()) { %>
-                <% for (AnswerModel answer : answers) { %>
-                <div class="answer-content">
-                    <% if ("teacher".equals(role)) { %>
-                        <form method="post" action="${pageContext.request.contextPath}/teacher/questions" style="display: inline;" onsubmit="return confirm('确定要删除这个回答吗？')">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="answerId" value="<%= answer.getId() %>">
-                            <input type="hidden" name="courseId" value="<%= question.getCourseId() %>">
-                            <button type="submit" class="delete-btn">删除回答</button>
-                        </form>
-                        
-                        <form method="post" action="${pageContext.request.contextPath}/teacher/questions" style="display: inline;">
-                            <input type="hidden" name="action" value="edit">
-                            <input type="hidden" name="answerId" value="<%= answer.getId() %>">
-                            <input type="hidden" name="courseId" value="<%= question.getCourseId() %>">
-                            <button type="submit" class="update-btn">修改回答</button>
-                        </form>
-                    <% } %>
-                    <div id="answer-content-<%= answer.getId() %>">
-                        <%= answer.getContent() %>
-                    </div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                        教师: 
-                        <% if (answer.getTeacherName() != null) { %>
-                        <%= answer.getTeacherName() %>
-                        <% } else { %>
-                        ID <%= answer.getTeacherId() %>
-                        <% } %> | 
-                        时间: <%= answer.getCreatedAt() != null ? dateFormat.format(answer.getCreatedAt()) : "-" %>
-                    </div>
-                    <% if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) { %>
-                    <div>
-                        <a href="<%= request.getContextPath() + answer.getAttachment() %>" 
-                           class="attachment-link" target="_blank">附件: <%= answer.getAttachment().substring(answer.getAttachment().lastIndexOf('/') + 1) %></a>
-                    </div>
-                    <% } %>
+            <% for (AnswerModel answer : answers) { %>
+            <div class="answer-content">
+                <% if ("teacher".equals(role)) { %>
+                <form method="post" action="${pageContext.request.contextPath}/teacher/questions" style="display: inline;" onsubmit="return confirm('确定要删除这个回答吗？')">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="answerId" value="<%= answer.getId() %>">
+                    <input type="hidden" name="courseId" value="<%= question.getCourseId() %>">
+                    <button type="submit" class="delete-btn">删除回答</button>
+                </form>
+
+                <form method="post" action="${pageContext.request.contextPath}/teacher/questions" style="display: inline;">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="answerId" value="<%= answer.getId() %>">
+                    <input type="hidden" name="courseId" value="<%= question.getCourseId() %>">
+                    <button type="submit" class="update-btn">修改回答</button>
+                </form>
+                <% } %>
+                <div id="answer-content-<%= answer.getId() %>">
+                    <%= answer.getContent() %>
+                </div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    教师:
+                    <% if (answer.getTeacherName() != null) { %>
+                    <%= answer.getTeacherName() %>
+                    <% } else { %>
+                    ID <%= answer.getTeacherId() %>
+                    <% } %> |
+                    时间: <%= answer.getCreatedAt() != null ? dateFormat.format(answer.getCreatedAt()) : "-" %>
+                </div>
+                <% if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) { %>
+                <div>
+                    <a href="<%= request.getContextPath() + answer.getAttachment() %>"
+                       class="attachment-link" target="_blank">附件: <%= answer.getAttachment().substring(answer.getAttachment().lastIndexOf('/') + 1) %></a>
                 </div>
                 <% } %>
+            </div>
+            <% } %>
             <% } else { %>
-                <div style="color: #dc3545; font-style: italic;">待回答</div>
-                <% if ("teacher".equals(role)) { %>
-                <a href="${pageContext.request.contextPath}/questions?action=answer&questionId=<%= question.getId() %>" class="btn btn-answer" style="margin-top: 10px; display: inline-block;">回答问题</a>
-                <% } %>
+            <div style="color: #dc3545; font-style: italic;">待回答</div>
+            <% if ("teacher".equals(role)) { %>
+            <a href="${pageContext.request.contextPath}/questions?action=answer&questionId=<%= question.getId() %>" class="btn btn-answer" style="margin-top: 10px; display: inline-block;">回答问题</a>
+            <% } %>
             <% } %>
         </div>
     </div>

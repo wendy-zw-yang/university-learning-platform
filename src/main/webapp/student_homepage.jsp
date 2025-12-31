@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.ulp.bean.UserModel" %>
+<%@ page import="com.ulp.service.NotificationService" %>
 <%
     // 验证用户是否登录且为学生
     UserModel user = (UserModel) session.getAttribute("user");
@@ -7,6 +8,10 @@
         response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
+
+    // 获取学生未读回答通知数量
+    NotificationService notificationService = new NotificationService();
+    int studentUnreadAnswerCount = notificationService.getUnreadCountByUserIdAndType(user.getId(), "answer");
 %>
 <!DOCTYPE html>
 <html>
@@ -71,6 +76,13 @@
             color: #4d4d4d;
             margin-bottom: 10px;
         }
+        .message-box h2 .content {
+            display: inline-block;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -112,46 +124,52 @@
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <h1>🎓 大学学习平台 - 学生中心</h1>
-        <div class="user-info">
-            <span><span class="badge">学生</span> <%= user.getUsername() %></span>
-            <a href="<%= request.getContextPath() %>/profile">个人资料</a>
-            <a href="<%= request.getContextPath() %>/logout">退出登录</a>
+<div class="navbar">
+    <h1>🎓 大学学习平台 - 学生中心</h1>
+    <div class="user-info">
+        <span><span class="badge">学生</span> <%= user.getUsername() %></span>
+        <a href="<%= request.getContextPath() %>/profile">个人资料</a>
+        <a href="<%= request.getContextPath() %>/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="welcome-card">
+        <h2>欢迎回来，<%= user.getUsername() %>！</h2>
+    </div>
+    <!-- 以下完善通知功能 （实现绑定以及跳转功能）-->
+    <div class="message-box">
+        <% if (studentUnreadAnswerCount > 0) { %>
+        <h2><a href="${pageContext.request.contextPath}/student/questions" style="text-decoration: none; color: #721c24;">
+            您有 <span class="content"><%= studentUnreadAnswerCount %></span> 条新回答
+        </a></h2>
+        <% } else { %>
+        <h2>您有 <span class="content"><%= studentUnreadAnswerCount %></span> 条新回答</h2>
+        <% } %>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-card" onclick="goToCourses()">
+            <div class="icon">🎓</div>
+            <h3>课程管理</h3>
+        </div>
+
+        <div class="dashboard-card" onclick="goToResources()">
+            <div class="icon">📚</div>
+            <h3>学习资源</h3>
+        </div>
+
+        <div class="dashboard-card" onclick="goToQnA()">
+            <div class="icon">📝</div>
+            <h3>问答讨论</h3>
+        </div>
+
+        <div class="dashboard-card" onclick="goToResources()">
+            <div class="icon">📊</div>
+            <h3>管理个人资源</h3>
         </div>
     </div>
-    
-    <div class="container">
-        <div class="welcome-card">
-            <h2>欢迎回来，<%= user.getUsername() %>！</h2>
-        </div>
-        <!-- 以下完善通知功能 （实现绑定以及跳转功能）-->
-        <div class="message-box">
-            <h2 class="content">您有 条新回答</h2>
-        </div>
-
-        <div class="dashboard-grid">
-            <div class="dashboard-card" onclick="goToCourses()">
-                <div class="icon">🎓</div>
-                <h3>课程管理</h3>
-            </div>
-
-            <div class="dashboard-card" onclick="goToResources()">
-                <div class="icon">📚</div>
-                <h3>学习资源</h3>
-            </div>
-
-            <div class="dashboard-card" onclick="goToQnA()">
-                <div class="icon">📝</div>
-                <h3>问答讨论</h3>
-            </div>
-
-            <div class="dashboard-card" onclick="goToResources()">
-                <div class="icon">📊</div>
-                <h3>管理个人资源</h3>
-            </div>
-        </div>
-    </div>
+</div>
 </body>
 <script>
     function goToCourses() {
