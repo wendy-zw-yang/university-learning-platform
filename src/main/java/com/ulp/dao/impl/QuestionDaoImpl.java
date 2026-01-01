@@ -500,4 +500,60 @@ public class QuestionDaoImpl implements QuestionDao {
         return null;
     }
 
+    @Override
+    public List<com.ulp.bean.QuestionWithAnswers> getQuestionsByStudentId(int studentId) {
+        List<com.ulp.bean.QuestionWithAnswers> questions = new ArrayList<>();
+
+        String sql = "SELECT q.*, u.username as student_name FROM questions q " +
+                "LEFT JOIN users u ON q.student_id = u.id " +
+                "WHERE q.student_id = ? ORDER BY q.created_at DESC";
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, studentId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                QuestionModel question = new QuestionModel();
+                question.setId(rs.getInt("id"));
+                question.setTitle(rs.getString("title"));
+                question.setContent(rs.getString("content"));
+                question.setAttachment(rs.getString("attachment"));
+                question.setCourseId(rs.getInt("course_id"));
+                question.setStudentId(rs.getInt("student_id"));
+                question.setCreatedAt(rs.getTimestamp("created_at"));
+
+                String studentName = rs.getString("student_name");
+
+                // 获取该问题的所有回答
+                List<AnswerModel> answers = getAnswersByQuestionId(question.getId());
+
+                questions.add(new com.ulp.bean.QuestionWithAnswers(question, studentName, answers));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return questions;
+    }
+
+    @Override
+    public boolean updateQuestionAttachment(int questionId, String newAttachment) {
+        String sql = "UPDATE questions SET attachment = ? WHERE id = ?";
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newAttachment);
+            pstmt.setInt(2, questionId);
+
+            int result = pstmt.executeUpdate();
+            return result > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

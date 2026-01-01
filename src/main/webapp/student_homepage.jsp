@@ -156,7 +156,7 @@
             <h3>问答讨论</h3>
         </div>
 
-        <div class="dashboard-card" onclick="goToResources()">
+        <div class="dashboard-card" onclick="goToCenter()">
             <div class="icon">📊</div>
             <h3>个人中心</h3>
         </div>
@@ -172,6 +172,9 @@
     }
     function goToQnA() {
         window.location.href = "${pageContext.request.contextPath}/student/questions";
+    }
+    function goToCenter() {
+        window.location.href = "${pageContext.request.contextPath}/student_center.jsp";
     }
 </script>
 </html>

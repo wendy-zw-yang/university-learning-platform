@@ -21,6 +21,9 @@ public interface QuestionDao {
     public List<CourseWithQuestionCount> getCoursesByTeacherIdGeneric(int teacherId);
     public List<QuestionWithAnswers> getQuestionsByCourseIdGeneric(int courseId);
     public List<Integer> getEnrolledCourseIds(int studentId);
+    public List<com.ulp.bean.QuestionWithAnswers> getQuestionsByStudentId(int studentId);
+    public boolean updateQuestionAttachment(int questionId, String newAttachment);
+
 
     // 管理员功能相关方法
     public List<CourseWithQuestionCount> getAllCoursesWithQuestionCount();

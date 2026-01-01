@@ -1,21 +1,21 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.ulp.bean.ResourceModel" %>
-<%@ page import="java.util.List" %>
+<%@ page import="com.ulp.bean.QuestionModel" %>
+<%@ page import="com.ulp.bean.UserModel" %>
 <%
-    // 验证用户是否登录且为管理员
-    Object userObj = session.getAttribute("user");
-    if (userObj == null || !"admin".equals(userObj.getClass().getMethod("getRole").invoke(userObj))) {
+    // 验证用户是否登录且为学生
+    UserModel user = (UserModel) session.getAttribute("user");
+    if (user == null || !"student".equals(user.getRole())) {
         response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
 
-    // 获取资源信息
-    ResourceModel resource = (ResourceModel) request.getAttribute("resource");
-    String courseIdParam = request.getParameter("courseId");
-    Integer courseId = null;
-    if (courseIdParam != null && !courseIdParam.isEmpty()) {
+    // 获取问题信息
+    QuestionModel question = (QuestionModel) request.getAttribute("question");
+    String questionIdParam = request.getParameter("questionId");
+    Integer questionId = null;
+    if (questionIdParam != null && !questionIdParam.isEmpty()) {
         try {
-            courseId = Integer.parseInt(courseIdParam);
+            questionId = Integer.parseInt(questionIdParam);
         } catch (NumberFormatException e) {
             // 如果参数无效，忽略
         }
@@ -23,14 +23,14 @@
 
     // 获取错误信息
     String errorMessage = (String) request.getAttribute("error");
-    boolean isEdit = resource != null;
+    boolean isEdit = question != null;
 %>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= isEdit ? "编辑资源" : "添加资源" %> - 大学生学习平台</title>
+    <title><%= isEdit ? "编辑问题" : "添加问题" %> - 大学生学习平台</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
@@ -160,45 +160,44 @@
 <body>
 <%@ include file="navbar.jsp" %>
 <div class="container">
-    <h1><%= isEdit ? "编辑资源信息" : "添加资源" %></h1>
+    <h1><%= isEdit ? "编辑问题信息" : "添加问题" %></h1>
 
     <%-- 显示错误消息 --%>
     <% if (errorMessage != null && !errorMessage.isEmpty()) { %>
     <div class="message error"><%= errorMessage %></div>
     <% } %>
 
-    <form method="post" action="${pageContext.request.contextPath}/admin/resource" enctype="multipart/form-data">
+    <form method="post" action="${pageContext.request.contextPath}/student/center/question" enctype="multipart/form-data">
         <% if (isEdit) { %>
         <input type="hidden" name="action" value="update">
-        <input type="hidden" name="id" value="<%= resource.getId() %>">
-        <input type="hidden" name="courseId" value="<%= courseId %>">
+        <input type="hidden" name="questionId" value="<%= question.getId() %>">
         <% } else { %>
         <input type="hidden" name="action" value="add">
         <% } %>
 
         <div class="form-group">
-            <label for="title">资源标题 <span class="required">*</span></label>
+            <label for="title">问题标题 <span class="required">*</span></label>
             <input type="text"
                    id="title"
                    name="title"
-                   value="<%= isEdit ? resource.getTitle() : "" %>"
+                   value="<%= isEdit ? question.getTitle() : "" %>"
                    required
                    maxlength="100"
-                   placeholder="请输入资源标题">
-            <div class="help-text">资源的名称，最多100个字符</div>
+                   placeholder="请输入问题标题">
+            <div class="help-text">问题的标题，最多100个字符</div>
         </div>
 
         <div class="form-group">
-            <label for="description">资源描述</label>
-            <textarea id="description"
-                      name="description"
-                      placeholder="请输入资源的详细描述"><%= isEdit && resource.getDescription() != null ? resource.getDescription() : "" %></textarea>
-            <div class="help-text">对资源内容的详细说明</div>
+            <label for="content">问题内容 <span class="required">*</span></label>
+            <textarea id="content"
+                      name="content"
+                      placeholder="请输入问题的详细内容"><%= isEdit && question.getContent() != null ? question.getContent() : "" %></textarea>
+            <div class="help-text">问题的详细内容描述</div>
         </div>
 
         <div class="form-group">
-            <label for="newFile">上传新附件 (覆盖原附件):</label>
-            <input type="file" id="newFile" name="newFile" class="file-input" accept="*">
+            <label for="newAttachment">上传新附件 (覆盖原附件):</label>
+            <input type="file" id="newAttachment" name="newAttachment" class="file-input" accept="*">
             <div style="font-size: 12px; color: #666; margin-top: 5px;">
                 上传新附件将覆盖原有附件，如不需修改附件请保持空白
             </div>
@@ -206,9 +205,9 @@
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
-                <%= isEdit ? "保存修改" : "添加资源" %>
+                <%= isEdit ? "保存修改" : "添加问题" %>
             </button>
-            <a href="${pageContext.request.contextPath}/admin/resource<%= courseId != null ? "?courseId=" + courseId : "" %>" class="btn btn-secondary">取消</a>
+            <a href="${pageContext.request.contextPath}/student_center.jsp" class="btn btn-secondary">取消</a>
         </div>
     </form>
 </div>

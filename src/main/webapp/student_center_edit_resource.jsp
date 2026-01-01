@@ -1,21 +1,21 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.ulp.bean.ResourceModel" %>
-<%@ page import="java.util.List" %>
+<%@ page import="com.ulp.bean.UserModel" %>
 <%
-    // 验证用户是否登录且为管理员
-    Object userObj = session.getAttribute("user");
-    if (userObj == null || !"admin".equals(userObj.getClass().getMethod("getRole").invoke(userObj))) {
+    // 验证用户是否登录且为学生
+    UserModel user = (UserModel) session.getAttribute("user");
+    if (user == null || !"student".equals(user.getRole())) {
         response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
 
     // 获取资源信息
     ResourceModel resource = (ResourceModel) request.getAttribute("resource");
-    String courseIdParam = request.getParameter("courseId");
-    Integer courseId = null;
-    if (courseIdParam != null && !courseIdParam.isEmpty()) {
+    String resourceIdParam = request.getParameter("id");
+    Integer resourceId = null;
+    if (resourceIdParam != null && !resourceIdParam.isEmpty()) {
         try {
-            courseId = Integer.parseInt(courseIdParam);
+            resourceId = Integer.parseInt(resourceIdParam);
         } catch (NumberFormatException e) {
             // 如果参数无效，忽略
         }
@@ -167,11 +167,10 @@
     <div class="message error"><%= errorMessage %></div>
     <% } %>
 
-    <form method="post" action="${pageContext.request.contextPath}/admin/resource" enctype="multipart/form-data">
-        <% if (isEdit) { %>
+    <form method="post" action="${pageContext.request.contextPath}/student/center/resource" enctype="multipart/form-data">
+    <% if (isEdit) { %>
         <input type="hidden" name="action" value="update">
         <input type="hidden" name="id" value="<%= resource.getId() %>">
-        <input type="hidden" name="courseId" value="<%= courseId %>">
         <% } else { %>
         <input type="hidden" name="action" value="add">
         <% } %>
@@ -208,7 +207,7 @@
             <button type="submit" class="btn btn-primary">
                 <%= isEdit ? "保存修改" : "添加资源" %>
             </button>
-            <a href="${pageContext.request.contextPath}/admin/resource<%= courseId != null ? "?courseId=" + courseId : "" %>" class="btn btn-secondary">取消</a>
+            <a href="${pageContext.request.contextPath}/student_center.jsp" class="btn btn-secondary">取消</a>
         </div>
     </form>
 </div>

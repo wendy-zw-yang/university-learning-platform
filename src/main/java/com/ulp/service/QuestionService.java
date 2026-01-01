@@ -8,6 +8,7 @@ import com.ulp.dao.QuestionDao;
 import com.ulp.dao.impl.QuestionDaoImpl;
 import com.ulp.servlet.TeacherQuestionServlet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QuestionService {
@@ -97,5 +98,28 @@ public class QuestionService {
     public boolean updateAnswerContent(int answerId, String newContent) {
         QuestionDaoImpl questionDao = new QuestionDaoImpl();
         return questionDao.updateAnswerContent(answerId, newContent);
+    }
+
+    public List<QuestionWithAnswers> getQuestionsByStudentId(int studentId) {
+        // 从数据库中获取该学生提出的问题列表
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        // 获取所有问题，然后筛选出该学生提出的问题
+        List<com.ulp.bean.QuestionWithAnswers> allQuestions = questionDao.getQuestionsByStudentId(studentId);
+
+        // 转换为内部类
+        List<QuestionWithAnswers> studentQuestions = new ArrayList<>();
+        for (com.ulp.bean.QuestionWithAnswers genericQuestion : allQuestions) {
+            studentQuestions.add(new QuestionWithAnswers(
+                    genericQuestion.getQuestion(),
+                    genericQuestion.getStudentName(),
+                    genericQuestion.getAnswers()
+            ));
+        }
+        return studentQuestions;
+    }
+
+    public boolean updateQuestionAttachment(int questionId, String newAttachment) {
+        QuestionDaoImpl questionDao = new QuestionDaoImpl();
+        return questionDao.updateQuestionAttachment(questionId, newAttachment);
     }
 }

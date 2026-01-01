@@ -1,8 +1,8 @@
 package com.ulp.servlet;
 
 import com.ulp.bean.ResourceModel;
+import com.ulp.bean.UserModel;
 import com.ulp.service.ResourceService;
-import com.ulp.service.CourseService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -17,19 +17,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/admin/resource")
+@WebServlet("/student/center/resource")
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
         maxFileSize = 1024 * 1024 * 10,       // 10MB
         maxRequestSize = 1024 * 1024 * 50     // 50MB
 )
-public class AdminResourceServlet extends HttpServlet {
+public class StudentCenterResourceServlet extends HttpServlet {
     private ResourceService resourceService;
-    private CourseService courseService;
 
-    public AdminResourceServlet() {
+    public StudentCenterResourceServlet() {
         this.resourceService = new ResourceService();
-        this.courseService = new CourseService();
     }
 
     @Override
@@ -47,7 +45,7 @@ public class AdminResourceServlet extends HttpServlet {
         // 检查用户角色
         try {
             String role = (String) userObj.getClass().getMethod("getRole").invoke(userObj);
-            if (!"admin".equals(role)) {
+            if (!"student".equals(role)) {
                 response.sendRedirect(request.getContextPath() + "/login");
                 return;
             }
@@ -56,36 +54,35 @@ public class AdminResourceServlet extends HttpServlet {
             return;
         }
 
+        UserModel user = (UserModel) userObj;
         String action = request.getParameter("action");
         String resourceIdParam = request.getParameter("id");
-        String courseIdParam = request.getParameter("courseId");
 
         if ("edit".equals(action) && resourceIdParam != null) {
             // 编辑资源 - 显示编辑表单
             try {
                 Integer resourceId = Integer.parseInt(resourceIdParam);
                 ResourceModel resource = resourceService.getResourceById(resourceId);
-                if (resource != null) {
-                    // 获取所有课程用于编辑页面
-                    List<com.ulp.bean.CourseModel> courses = courseService.getAllCourses();
-                    request.setAttribute("courses", courses);
+
+                // 验证资源是否属于当前用户
+                if (resource != null && resource.getUploaderId().equals(user.getId())) {
                     request.setAttribute("resource", resource);
-                    request.getRequestDispatcher("/admin_edit_resource.jsp").forward(request, response);
+                    request.getRequestDispatcher("/student_center_edit_resource.jsp").forward(request, response);
+                    return;
+                } else {
+                    request.setAttribute("error", "找不到指定的资源或您没有权限编辑此资源！");
+                    request.getRequestDispatcher("/student_center.jsp").forward(request, response);
                     return;
                 }
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "无效的资源ID！");
+                request.getRequestDispatcher("/student_center.jsp").forward(request, response);
+                return;
             }
         }
 
-        // 获取所有资源和课程
-        List<ResourceModel> resources = resourceService.getAllResources();
-        List<com.ulp.bean.CourseModel> courses = courseService.getAllCourses();
-
-        request.setAttribute("resources", resources);
-        request.setAttribute("courses", courses);
-
-        request.getRequestDispatcher("/admin_resource.jsp").forward(request, response);
+        // 默认重定向到个人中心
+        response.sendRedirect(request.getContextPath() + "/student_center.jsp");
     }
 
     @Override
@@ -103,7 +100,7 @@ public class AdminResourceServlet extends HttpServlet {
         // 检查用户角色
         try {
             String role = (String) userObj.getClass().getMethod("getRole").invoke(userObj);
-            if (!"admin".equals(role)) {
+            if (!"student".equals(role)) {
                 response.sendRedirect(request.getContextPath() + "/login");
                 return;
             }
@@ -112,6 +109,7 @@ public class AdminResourceServlet extends HttpServlet {
             return;
         }
 
+        UserModel user = (UserModel) userObj;
         String action = request.getParameter("action");
 
         if ("delete".equals(action)) {
@@ -120,11 +118,18 @@ public class AdminResourceServlet extends HttpServlet {
             if (idParam != null) {
                 try {
                     Integer id = Integer.parseInt(idParam);
-                    boolean success = resourceService.deleteResource(id);
-                    if (success) {
-                        request.setAttribute("success", "资源删除成功！");
+                    ResourceModel resource = resourceService.getResourceById(id);
+
+                    // 验证资源是否属于当前用户
+                    if (resource != null && resource.getUploaderId().equals(user.getId())) {
+                        boolean success = resourceService.deleteResource(id);
+                        if (success) {
+                            request.setAttribute("success", "资源删除成功！");
+                        } else {
+                            request.setAttribute("error", "删除资源失败！");
+                        }
                     } else {
-                        request.setAttribute("error", "删除资源失败！");
+                        request.setAttribute("error", "您没有权限删除此资源！");
                     }
                 } catch (NumberFormatException e) {
                     request.setAttribute("error", "无效的资源ID！");
@@ -137,23 +142,16 @@ public class AdminResourceServlet extends HttpServlet {
             String idParam = request.getParameter("id");
             String title = request.getParameter("title");
             String description = request.getParameter("description");
-            String courseIdParam = request.getParameter("courseId");
 
             if (idParam != null && title != null && !title.trim().isEmpty()) {
                 try {
                     Integer id = Integer.parseInt(idParam);
-                    Integer courseId = null;
-                    if (courseIdParam != null && !courseIdParam.isEmpty()) {
-                        courseId = Integer.parseInt(courseIdParam);
-                    }
-
                     ResourceModel resource = resourceService.getResourceById(id);
-                    if (resource != null) {
+
+                    // 验证资源是否属于当前用户
+                    if (resource != null && resource.getUploaderId().equals(user.getId())) {
                         resource.setTitle(title);
                         resource.setDescription(description);
-                        if (courseId != null) {
-                            resource.setCourseId(courseId);
-                        }
 
                         // 获取上传的附件
                         String newFilePath = null;
@@ -201,23 +199,18 @@ public class AdminResourceServlet extends HttpServlet {
                             request.setAttribute("error", "更新资源信息失败！");
                         }
                     } else {
-                        request.setAttribute("error", "找不到指定的资源！");
+                        request.setAttribute("error", "您没有权限更新此资源！");
                     }
                 } catch (NumberFormatException e) {
-                    request.setAttribute("error", "无效的资源ID或课程ID！");
+                    request.setAttribute("error", "无效的资源ID！");
                 }
             } else {
                 request.setAttribute("error", "请输入完整的资源信息！");
             }
         }
 
-        // 重定向到资源管理页面
-        String courseIdParamInRequest = request.getParameter("courseId");
-        String redirectUrl = request.getContextPath() + "/admin/resource";
-        if (courseIdParamInRequest != null && !courseIdParamInRequest.isEmpty()) {
-            redirectUrl += "?courseId=" + courseIdParamInRequest;
-        }
-        response.sendRedirect(redirectUrl);
+        // 重定向到个人中心页面
+        response.sendRedirect(request.getContextPath() + "/student_center.jsp");
     }
 
     // 获取上传文件的文件名
