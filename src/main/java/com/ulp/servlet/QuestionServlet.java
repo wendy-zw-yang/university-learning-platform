@@ -180,6 +180,7 @@ public class QuestionServlet extends HttpServlet {
 
                         // 保存文件到指定目录
                         String uploadPath = getServletContext().getRealPath(attachmentPath);
+                        System.out.println("Write To: " + uploadPath);
                         filePart.write(uploadPath);
                     }
                 }
@@ -272,6 +273,7 @@ public class QuestionServlet extends HttpServlet {
 
                         // 保存文件到指定目录
                         String uploadPath = getServletContext().getRealPath(attachmentPath);
+                        System.out.println("Write To: " + uploadPath);
                         filePart.write(uploadPath);
                     }
                 }

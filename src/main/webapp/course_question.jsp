@@ -510,10 +510,12 @@
         <div style="margin-top: 8px;">
             <%= question.getContent() %>
         </div>
-        <% if (question.getAttachment() != null && !question.getAttachment().isEmpty()) { %>
+        <% if (question.getAttachment() != null && !question.getAttachment().isEmpty()) {
+            String questionAttachmentPath = question.getAttachment();
+        %>
         <div>
-            <a href="<%= request.getContextPath() + question.getAttachment() %>"
-               class="attachment-link" target="_blank">附件: <%= question.getAttachment().substring(question.getAttachment().lastIndexOf('/') + 1) %></a>
+            <a href="${pageContext.request.contextPath}<%= questionAttachmentPath %>"
+               class="attachment-link" target="_blank">附件: <%= questionAttachmentPath.substring(questionAttachmentPath.lastIndexOf('/') + 1) %></a>
         </div>
         <% } %>
 
@@ -521,7 +523,9 @@
         <div style="margin-top: 15px;">
             <strong>教师回答:</strong>
             <% if (answers != null && !answers.isEmpty()) { %>
-            <% for (AnswerModel answer : answers) { %>
+            <% for (AnswerModel answer : answers) {
+                String answerAttachmentPath = answer.getAttachment();
+            %>
             <div class="answer-content">
                 <% if ("teacher".equals(role)) { %>
                 <form method="post" action="${pageContext.request.contextPath}/teacher/questions" style="display: inline;" onsubmit="return confirm('确定要删除这个回答吗？')">
@@ -550,10 +554,11 @@
                     <% } %> |
                     时间: <%= answer.getCreatedAt() != null ? dateFormat.format(answer.getCreatedAt()) : "-" %>
                 </div>
-                <% if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) { %>
+                <% if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) {
+                %>
                 <div>
-                    <a href="<%= request.getContextPath() + answer.getAttachment() %>"
-                       class="attachment-link" target="_blank">附件: <%= answer.getAttachment().substring(answer.getAttachment().lastIndexOf('/') + 1) %></a>
+                    <a href="${pageContext.request.contextPath}<%= answerAttachmentPath %>"
+                       class="attachment-link" target="_blank">附件: <%= answerAttachmentPath.substring(answerAttachmentPath.lastIndexOf('/') + 1) %></a>
                 </div>
                 <% } %>
             </div>

@@ -62,4 +62,30 @@ public class AnswerDaoImpl implements AnswerDao {
         
         return answerList;
     }
+
+    @Override
+    public AnswerModel getAnswerById(int answerId) {
+        String sql = "SELECT * FROM answers WHERE id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, answerId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                AnswerModel answer = new AnswerModel();
+                answer.setId(rs.getInt("id"));
+                answer.setContent(rs.getString("content"));
+                answer.setAttachment(rs.getString("attachment"));
+                answer.setQuestionId(rs.getInt("question_id"));
+                answer.setTeacherId(rs.getInt("teacher_id"));
+                answer.setCreatedAt(rs.getTimestamp("created_at"));
+                return answer;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

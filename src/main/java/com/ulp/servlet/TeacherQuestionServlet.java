@@ -6,15 +6,20 @@ import com.ulp.dao.impl.CourseDaoImpl;
 import com.ulp.dao.impl.QuestionDaoImpl;
 import com.ulp.dao.impl.AnswerDaoImpl;
 import com.ulp.service.QuestionService;
+import com.ulp.service.AnswerService;
 import com.ulp.util.DBHelper;
 import com.ulp.bean.QuestionWithAnswers;
 import com.ulp.bean.CourseWithQuestionCount;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,9 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/teacher/questions")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
+        maxFileSize = 1024 * 1024 * 10,       // 10MB
+        maxRequestSize = 1024 * 1024 * 50     // 50MB
+)
 public class TeacherQuestionServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // 获取当前登录教师，这里假设已登录教师user存储在session中
         UserModel teacher = (UserModel) request.getSession().getAttribute("user");
@@ -39,14 +49,14 @@ public class TeacherQuestionServlet extends HttpServlet {
         try {
             // 获取教师教授的课程列表
             List<CourseWithQuestionCount> courses = getCoursesByTeacherId(teacher.getId());
-            
+
             // 获取课程ID参数
             String courseIdParam = request.getParameter("courseId");
-            
+
             if (courseIdParam != null && !courseIdParam.isEmpty()) {
                 try {
                     int courseId = Integer.parseInt(courseIdParam);
-                    
+
                     // 验证该课程是否属于当前教师
                     boolean isTeacherCourse = false;
                     for (CourseWithQuestionCount course : courses) {
@@ -55,40 +65,40 @@ public class TeacherQuestionServlet extends HttpServlet {
                             break;
                         }
                     }
-                    
+
                     if (!isTeacherCourse) {
                         request.setAttribute("error", "您没有权限查看此课程的问题");
                         request.getRequestDispatcher("/course_question.jsp").forward(request, response);
                         return;
                     }
-                    
+
                     // 获取该课程的问题列表
                     List<QuestionWithAnswers> questions = getQuestionsByCourseId(courseId);
-                    
+
                     // 设置请求属性
                     request.setAttribute("questions", questions);
                     request.setAttribute("selectedCourseId", courseId);
-                    
+
                 } catch (NumberFormatException e) {
                     request.setAttribute("error", "课程ID格式不正确");
                 }
             }
-            
+
             // 设置课程列表
             request.setAttribute("courses", courses);
-            
+
             // 转发到课程-问题页面
             request.getRequestDispatcher("/course_question.jsp").forward(request, response);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "系统错误：" + e.getMessage());
             request.getRequestDispatcher("/course_question.jsp").forward(request, response);
         }
     }
-    
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         UserModel teacher = (UserModel) request.getSession().getAttribute("user");
         if (teacher == null || !"teacher".equals(teacher.getRole())) {
@@ -107,12 +117,12 @@ public class TeacherQuestionServlet extends HttpServlet {
     }
 
     // 处理删除回答
-    private void handleDeleteAnswer(HttpServletRequest request, HttpServletResponse response, int teacherId) 
+    private void handleDeleteAnswer(HttpServletRequest request, HttpServletResponse response, int teacherId)
             throws IOException {
         try {
             int answerId = Integer.parseInt(request.getParameter("answerId"));
             int courseId = Integer.parseInt(request.getParameter("courseId"));
-            
+
             // 验证该回答是否属于该教师
             QuestionService questionService = new QuestionService();
             QuestionDaoImpl questionDao = new QuestionDaoImpl();
@@ -120,16 +130,16 @@ public class TeacherQuestionServlet extends HttpServlet {
             if (answer != null && answer.getTeacherId() == teacherId) {
                 // 删除回答
                 boolean success = questionService.deleteAnswerById(answerId);
-                
+
                 if (success) {
-                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId +
                             "&success=succeeded");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId +
                             "&error=failed");
                 }
             } else {
-                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId +
                         "&error=none");
             }
         } catch (NumberFormatException e) {
@@ -138,30 +148,65 @@ public class TeacherQuestionServlet extends HttpServlet {
     }
 
     // 处理更新回答
-    private void handleUpdateAnswer(HttpServletRequest request, HttpServletResponse response, int teacherId) 
-            throws IOException {
+    private void handleUpdateAnswer(HttpServletRequest request, HttpServletResponse response, int teacherId)
+            throws IOException, ServletException {
         try {
             int answerId = Integer.parseInt(request.getParameter("answerId"));
             String newContent = request.getParameter("newContent");
             int courseId = Integer.parseInt(request.getParameter("courseId"));
-            
+
             // 验证该回答是否属于该教师
             QuestionService questionService = new QuestionService();
             QuestionDaoImpl questionDao = new QuestionDaoImpl();
             AnswerModel answer = questionDao.getAnswerById(answerId);
             if (answer != null && answer.getTeacherId() == teacherId) {
-                // 更新回答
-                boolean success = questionService.updateAnswerContent(answerId, newContent);
-                
+                // 获取上传的附件
+                String attachmentPath = null;
+                try {
+                    Part filePart = request.getPart("newAttachment");
+                    if (filePart != null && filePart.getSize() > 0) {
+                        // 处理文件上传
+                        String fileName = getFileName(filePart);
+                        if (fileName != null && !fileName.trim().isEmpty()) {
+                            String uploadFolder = getServletContext().getRealPath("/upload/answers");
+                            File uploadDir = new File(uploadFolder);
+                            if(!uploadDir.exists())
+                                uploadDir.mkdirs();
+                            attachmentPath = "/upload/answers/" + System.currentTimeMillis() + "_" + fileName;
+
+                            // 保存文件到指定目录
+                            String uploadPath = getServletContext().getRealPath(attachmentPath);
+                            System.out.println("Write To: " + uploadPath);
+                            filePart.write(uploadPath);
+
+                            // 如果有新附件上传，则删除旧附件
+                            if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) {
+                                String oldFilePath = getServletContext().getRealPath(answer.getAttachment());
+                                File oldFile = new File(oldFilePath);
+                                if (oldFile.exists()) {
+                                    oldFile.delete();
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // 即使附件上传失败，也继续更新内容
+                }
+
+                // 更新回答内容和附件
+                AnswerService answerService = new AnswerService();
+                boolean success = answerService.updateAnswer(answerId, newContent, attachmentPath);
+
                 if (success) {
-                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId +
                             "&success=succeeded");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                    response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId +
                             "&error=failed");
                 }
             } else {
-                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId + 
+                response.sendRedirect(request.getContextPath() + "/teacher/questions?courseId=" + courseId +
                         "&error=none");
             }
         } catch (NumberFormatException e) {
@@ -170,7 +215,7 @@ public class TeacherQuestionServlet extends HttpServlet {
     }
 
     // 显示编辑回答页面
-    private void showEditAnswerPage(HttpServletRequest request, HttpServletResponse response) 
+    private void showEditAnswerPage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         UserModel teacher = (UserModel) request.getSession().getAttribute("user");
         if (teacher == null || !"teacher".equals(teacher.getRole())) {
@@ -181,7 +226,7 @@ public class TeacherQuestionServlet extends HttpServlet {
         try {
             int answerId = Integer.parseInt(request.getParameter("answerId"));
             int courseId = Integer.parseInt(request.getParameter("courseId"));
-            
+
             // 验证该回答是否属于该教师
             QuestionDaoImpl questionDao = new QuestionDaoImpl();
             AnswerModel answer = questionDao.getAnswerById(answerId);
@@ -198,53 +243,66 @@ public class TeacherQuestionServlet extends HttpServlet {
             doGet(request, response);
         }
     }
-    
+
+    // 获取上传文件的文件名
+    private String getFileName(Part part) {
+        String contentDisposition = part.getHeader("content-disposition");
+        if (contentDisposition != null) {
+            for (String content : contentDisposition.split(";")) {
+                if (content.trim().startsWith("filename")) {
+                    return content.substring(content.indexOf('=') + 1).trim().replace("\"", "");
+                }
+            }
+        }
+        return null;
+    }
+
     // 根据教师ID获取课程列表
     public List<CourseWithQuestionCount> getCoursesByTeacherId(int teacherId) {
         QuestionService questionService = new QuestionService();
         List<com.ulp.bean.CourseWithQuestionCount> genericCourses = questionService.getCoursesByTeacherId(teacherId);
-        
+
         // 转换通用类到内部类
         List<CourseWithQuestionCount> teacherCourses = new ArrayList<>();
         for (com.ulp.bean.CourseWithQuestionCount genericCourse : genericCourses) {
             teacherCourses.add(new CourseWithQuestionCount(
-                genericCourse.getCourse(),
-                genericCourse.getTeacherName(),
-                genericCourse.getQuestionCount()
+                    genericCourse.getCourse(),
+                    genericCourse.getTeacherName(),
+                    genericCourse.getQuestionCount()
             ));
         }
         return teacherCourses;
     }
-    
+
     // 获取指定课程的问题列表
     public List<QuestionWithAnswers> getQuestionsByCourseId(int courseId) {
         QuestionService questionService = new QuestionService();
         List<com.ulp.bean.QuestionWithAnswers> genericQuestions = questionService.getQuestionsByCourseIdForStudent(courseId);
-        
+
         // 转换通用类到内部类
         List<QuestionWithAnswers> teacherQuestions = new ArrayList<>();
         for (com.ulp.bean.QuestionWithAnswers genericQuestion : genericQuestions) {
             teacherQuestions.add(new QuestionWithAnswers(
-                genericQuestion.getQuestion(),
-                genericQuestion.getStudentName(),
-                genericQuestion.getAnswers()
+                    genericQuestion.getQuestion(),
+                    genericQuestion.getStudentName(),
+                    genericQuestion.getAnswers()
             ));
         }
         return teacherQuestions;
     }
-    
+
     // 获取指定问题的回答列表
     private List<AnswerModel> getAnswersByQuestionId(int questionId) {
         QuestionService  questionService = new QuestionService();
         return  questionService.getAnswersByQuestionId(questionId);
     }
-    
+
     // 获取指定课程的未回答问题数量
     public int getUnansweredQuestionCountByCourseId(int courseId) {
         QuestionService  questionService = new QuestionService();
         return  questionService.getUnansweredQuestionCountByCourseId(courseId);
     }
-    
+
     // 获取指定课程的总问题数量
     private int getQuestionCountByCourseId(int courseId) {
         QuestionService questionService = new QuestionService();

@@ -12,7 +12,7 @@
     // 获取要编辑的回答和课程信息
     AnswerModel answer = (AnswerModel) request.getAttribute("answer");
     Integer courseId = (Integer) request.getAttribute("courseId");
-    
+
     String errorMessage = (String) request.getAttribute("error");
 %>
 <!DOCTYPE html>
@@ -21,6 +21,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>编辑回答 - 教师</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -129,9 +130,33 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
+
+        .attachment-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+
+        .attachment-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .attachment-link:hover {
+            text-decoration: underline;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
 <div class="container">
     <div class="header">
         <h1>📝 编辑回答</h1>
@@ -144,21 +169,45 @@
     <% } %>
 
     <% if (answer != null) { %>
-    <form method="post" action="${pageContext.request.contextPath}/teacher/questions">
+    <form method="post" action="${pageContext.request.contextPath}/teacher/questions" enctype="multipart/form-data">
         <input type="hidden" name="action" value="update">
         <input type="hidden" name="answerId" value="<%= answer.getId() %>">
         <input type="hidden" name="courseId" value="<%= courseId %>">
-        
+
         <div class="answer-preview">
             <h3>原始回答内容:</h3>
             <p><%= answer.getContent() %></p>
+
+            <% if (answer.getAttachment() != null && !answer.getAttachment().isEmpty()) {
+                String attachmentPath = answer.getAttachment();
+            %>
+            <div class="attachment-info">
+                <strong>当前附件:</strong>
+                <a href="${pageContext.request.contextPath}<%= attachmentPath %>"
+                   class="attachment-link" target="_blank">
+                    <%= attachmentPath.substring(attachmentPath.lastIndexOf('/') + 1) %>
+                </a>
+            </div>
+            <% } else { %>
+            <div class="attachment-info">
+                <strong>当前附件:</strong> 无附件
+            </div>
+            <% } %>
         </div>
-        
+
         <div class="form-group">
             <label for="newContent">修改回答内容:</label>
             <textarea id="newContent" name="newContent" rows="10" required><%= answer.getContent() %></textarea>
         </div>
-        
+
+        <div class="form-group">
+            <label for="newAttachment">上传新附件 (覆盖原附件):</label>
+            <input type="file" id="newAttachment" name="newAttachment" class="file-input" accept="image/*">
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                上传新附件将覆盖原有附件，如不需修改附件请保持空白
+            </div>
+        </div>
+
         <div style="text-align: center;">
             <button type="submit" class="btn btn-primary">更新回答</button>
             <a href="${pageContext.request.contextPath}/teacher/questions?courseId=${courseId}" class="btn btn-secondary">取消</a>
