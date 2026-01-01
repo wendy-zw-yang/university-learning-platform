@@ -174,7 +174,7 @@
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">更新资料</button>
-            <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-secondary">取消</a>
+            <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-secondary">返回首页</a>
         </div>
     </form>
 </div>

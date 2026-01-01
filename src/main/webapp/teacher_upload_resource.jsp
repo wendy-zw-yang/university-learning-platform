@@ -2,6 +2,7 @@
 <%@ page import="com.ulp.bean.UserModel" %>
 <%@ page import="com.ulp.bean.CourseModel" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.ulp.service.UserService" %>
 <%
     // 验证用户是否登录且为教师
     UserModel user = (UserModel) session.getAttribute("user");
@@ -13,6 +14,9 @@
     // 获取课程列表
     List<CourseModel> courses = (List<CourseModel>) request.getAttribute("courses");
 
+    // 创建UserService实例获取教师名
+    UserService userService = new UserService();
+
     // 获取错误信息
     String errorMessage = (String) request.getAttribute("error");
     String successMessage = (String) request.getAttribute("success");
@@ -23,6 +27,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>课程资源管理 - 大学学习平台</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -108,36 +113,66 @@
             margin-top: 30px;
         }
 
+        /* 课程列表项整体样式 */
         .course-item {
             background: #f8f9fa;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
+            padding: 15px 16px;
+            margin-bottom: 10px;
+            border-radius: 4px;
             border-left: 4px solid #007bff;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: stretch;
+            position: relative;
         }
 
-        .course-info {
+        .course-item:hover {
+            background: #e9ecef;
+        }
+
+        /* 课程链接内容块 */
+        .course-link {
+            text-decoration: none;
+            color: #212529;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* 右侧资源气泡和按钮 */
+        .right-controls {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            margin-left: 24px;
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             flex: 1;
         }
 
-        .course-name {
+        .course-header strong {
             font-size: 18px;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
+            color: #222;
         }
 
-        .course-details {
-            color: #666;
+        .course-header span {
             font-size: 14px;
+            color: #666;
+            margin-left: 6px;
         }
 
-        .course-actions {
-            display: flex;
-            gap: 10px;
+        .course-desc {
+            color: #888;
+            font-size: 14px;
+            margin-top: 4px;
+            margin-left: 2px;
+            font-weight: normal;
         }
 
         .no-courses {
@@ -149,6 +184,7 @@
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
 <div class="container">
     <div class="header">
         <h1>📚 课程资源管理</h1>
@@ -166,15 +202,25 @@
 
     <div class="course-list">
         <% if (courses != null && !courses.isEmpty()) { %>
-        <% for (CourseModel course : courses) { %>
+        <% for (CourseModel course : courses) {
+            String teacherName = userService.getUsernameById(course.getTeacherId());
+        %>
         <div class="course-item">
-            <div class="course-info">
-                <div class="course-name"><%= course.getName() %></div>
-                <div class="course-details">
-                    学院: <%= course.getCollege() != null ? course.getCollege() : "未设置" %>
+            <a href="${pageContext.request.contextPath}/teacher/edit_resources?courseId=<%= course.getId() %>" class="course-link">
+                <div class="course-header">
+                    <div>
+                        <strong><%= course.getName() %></strong>
+                        <span>ID: <%= course.getId() %></span>
+                        <% if (teacherName != null) { %>
+                        <span> | 教师: <%= teacherName %></span>
+                        <% } %>
+                    </div>
                 </div>
-            </div>
-            <div class="course-actions">
+                <% if (course.getDescription() != null && !course.getDescription().isEmpty()) { %>
+                <div><%= course.getDescription() %></div>
+                <% } %>
+            </a>
+            <div class="right-controls">
                 <a href="${pageContext.request.contextPath}/teacher/edit_resources?courseId=<%= course.getId() %>" class="btn btn-primary">上传资源</a>
             </div>
         </div>

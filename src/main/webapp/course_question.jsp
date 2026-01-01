@@ -72,6 +72,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>问答讨论 - <%= "teacher".equals(role) ? "教师" : "学生" %></title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -166,15 +167,20 @@
             margin-bottom: 30px;
         }
 
+        .course-list h2 {
+            margin-bottom: 16px;
+        }
+
         .course-item {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 15px 16px;
             margin-bottom: 10px;
             border-radius: 4px;
             border-left: 4px solid #007bff;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: stretch;
+            position: relative;
         }
 
         .course-item:hover {
@@ -189,8 +195,10 @@
         .course-link {
             text-decoration: none;
             color: #333;
-            display: block;
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .course-link:hover {
@@ -201,6 +209,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex: 1;
         }
 
         .course-count {
@@ -306,9 +315,62 @@
         .update-btn:hover {
             background-color: #e0a800;
         }
+
+        /* 课程列表项整体样式 */
+        .course-item {
+            background: #f8f9fa;
+            padding: 15px 16px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            position: relative;
+        }
+        .course-item:hover {
+            background: #e9ecef;
+        }
+
+        /* 课程链接内容块 */
+        .course-link {
+            text-decoration: none;
+            color: #333;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* 右侧控制区域 */
+        .right-controls {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            margin-left: 24px;
+        }
+
+        .course-count {
+            display: inline-block;
+            background-color: #17a2b8;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            align-self: center;
+            margin-right: 12px;
+        }
+
+        .btn-primary {
+            min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
 <div class="container">
     <div class="header">
         <h1>💬 问答讨论区</h1>
@@ -371,16 +433,17 @@
                 <% } %>
             </a>
             <% if ("student".equals(role)) {
-                // 检查学生是否可以向该课程提问 - 可以向所有学生可见的课程或已选课程提问
                 boolean canAsk = "all".equals(course.getVisibility()) ||
                         new StudentCourseService().isStudentEnrolled(userObj.getId(), course.getId());
             %>
-            <% if (canAsk) { %>
-            <a href="${pageContext.request.contextPath}/questions?courseId=<%= course.getId() %>" class="btn btn-primary">提问</a>
-            <% } else { %>
-            <button class="btn btn-primary" disabled>未选课且课程不对外开放</button>
+            <div class="right-controls">
+                <% if (canAsk) { %>
+                <a href="${pageContext.request.contextPath}/questions?courseId=<%= course.getId() %>" class="btn btn-primary">提问</a>
+                <% } else { %>
+                <button class="btn btn-primary" disabled>未选课且课程不对外开放</button>
+                <% } %>
+            </div>
             <% } %>
-            <% }%>
         </div>
         <% } %>
         <% } else { %>

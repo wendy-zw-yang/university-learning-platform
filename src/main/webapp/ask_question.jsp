@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>提问 - 大学生学习平台</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
             margin: 0;
@@ -79,6 +80,7 @@
             padding: 12px 20px;
             border-radius: 4px;
             margin-bottom: 20px;
+            margin-top: 15px;
         }
 
         .error {
@@ -136,6 +138,7 @@
     </style>
 </head>
 <body>
+<%@ include file="navbar.jsp" %>
 <div class="container">
     <%
         CourseModel course = (CourseModel) request.getAttribute("course");
