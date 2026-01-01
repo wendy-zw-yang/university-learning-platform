@@ -233,7 +233,7 @@ public class StudentResourceServlet extends HttpServlet {
             ResourceModel resource = new ResourceModel();
             resource.setTitle(title);
             resource.setDescription(description);
-            resource.setFilePath(uniqueFileName); // 只保存文件名，不包含完整路径
+            resource.setFilePath("/uploads/" + uniqueFileName); // 保存完整路径，以/开头
             resource.setCourseId(courseId);
             resource.setUploaderId(uploaderId);
             resource.setDownloadCount(0);

@@ -199,7 +199,15 @@
             <p>文件类型: <%= resource.getFilePath().substring(resource.getFilePath().lastIndexOf('.') + 1).toUpperCase() %></p>
             <p>文件名: <%= resource.getFilePath() %></p>
             <div class="unsupported-file">
-                <a href="${pageContext.request.contextPath}/uploads/<%= resource.getFilePath() %>"
+                <%
+                    String resourcePath = resource.getFilePath();
+                    if (!resourcePath.startsWith("/")) {
+                        resourcePath = "/uploads/" + resourcePath;
+                    } else if (resourcePath.startsWith("/uploads/")) {
+                        resourcePath = resourcePath.substring(8); // 移除重复的/uploads/
+                    }
+                %>
+                <a href="${pageContext.request.contextPath}/uploads/<%= resourcePath %>"
                    target="_blank"
                    class="btn btn-primary">下载文件</a>
             </div>
