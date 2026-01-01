@@ -291,23 +291,6 @@
             background-color: #c82333;
         }
 
-        .update-btn {
-            position: absolute;
-            top: 10px;
-            right: 100px;
-            background-color: #ffc107;
-            color: #212529;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .update-btn:hover {
-            background-color: #e0a800;
-        }
-
         .admin-controls {
             margin-top: 10px;
             display: flex;
@@ -413,21 +396,6 @@
             <button type="submit" class="delete-btn">删除问题</button>
         </form>
 
-        <!-- 修改按钮 -->
-        <button type="button" class="update-btn" onclick="showUpdateQuestionForm(<%= question.getId() %>, '<%= question.getContent().replace("'", "\\'") %>')">修改问题</button>
-
-        <!-- 修改表单，初始隐藏 -->
-        <div id="update-question-form-<%= question.getId() %>" style="display: none; margin-top: 10px; padding: 10px; background-color: #f0f0f0; border-radius: 4px;">
-            <form method="post" action="${pageContext.request.contextPath}/admin/questions" style="display: inline;">
-                <input type="hidden" name="action" value="update">
-                <input type="hidden" name="questionId" value="<%= question.getId() %>">
-                <input type="hidden" name="courseId" value="<%= selectedCourseId %>">
-                <textarea name="newContent" rows="4" cols="50" class="update-textarea"><%= question.getContent() %></textarea><br>
-                <button type="submit" class="btn btn-primary" style="margin-top: 5px;">确认</button>
-                <button type="button" class="btn btn-secondary" style="margin-top: 5px;" onclick="hideUpdateQuestionForm(<%= question.getId() %>)">取消</button>
-            </form>
-        </div>
-
         <div class="question-title">
             <%= question.getTitle() %>
             <span style="font-weight: normal; color: #666; font-size: 14px; margin-left: 10px;">
@@ -458,21 +426,6 @@
                         <input type="hidden" name="courseId" value="<%= selectedCourseId %>">
                         <button type="submit" class="delete-btn">删除回答</button>
                     </form>
-
-                    <!-- 修改按钮 -->
-                    <button type="button" class="update-btn" onclick="showUpdateAnswerForm(<%= answer.getId() %>, '<%= answer.getContent().replace("'", "\\'") %>')">修改回答</button>
-
-                    <!-- 修改表单，初始隐藏 -->
-                    <div id="update-answer-form-<%= answer.getId() %>" style="display: none; margin-top: 10px; padding: 10px; background-color: #e0e0e0; border-radius: 4px;">
-                        <form method="post" action="${pageContext.request.contextPath}/admin/questions" style="display: inline;">
-                            <input type="hidden" name="action" value="update">
-                            <input type="hidden" name="answerId" value="<%= answer.getId() %>">
-                            <input type="hidden" name="courseId" value="<%= selectedCourseId %>">
-                            <textarea name="newContent" rows="4" cols="50" class="update-textarea"><%= answer.getContent() %></textarea><br>
-                            <button type="submit" class="btn btn-primary" style="margin-top: 5px;">确认</button>
-                            <button type="button" class="btn btn-secondary" style="margin-top: 5px;" onclick="hideUpdateAnswerForm(<%= answer.getId() %>)">取消</button>
-                        </form>
-                    </div>
 
                     <div id="answer-content-<%= answer.getId() %>">
                         <%= answer.getContent() %>
@@ -509,30 +462,5 @@
     <% } %>
 </div>
 
-<script>
-    function showUpdateQuestionForm(questionId, currentContent) {
-        // 隐藏内容显示，显示编辑表单
-        document.getElementById('question-content-' + questionId).style.display = 'none';
-        document.getElementById('update-question-form-' + questionId).style.display = 'block';
-    }
-
-    function hideUpdateQuestionForm(questionId) {
-        // 显示内容，隐藏编辑表单
-        document.getElementById('question-content-' + questionId).style.display = 'block';
-        document.getElementById('update-question-form-' + questionId).style.display = 'none';
-    }
-
-    function showUpdateAnswerForm(answerId, currentContent) {
-        // 隐藏内容显示，显示编辑表单
-        document.getElementById('answer-content-' + answerId).style.display = 'none';
-        document.getElementById('update-answer-form-' + answerId).style.display = 'block';
-    }
-
-    function hideUpdateAnswerForm(answerId) {
-        // 显示内容，隐藏编辑表单
-        document.getElementById('answer-content-' + answerId).style.display = 'block';
-        document.getElementById('update-answer-form-' + answerId).style.display = 'none';
-    }
-</script>
 </body>
 </html>
