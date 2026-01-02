@@ -143,11 +143,20 @@ public class TeacherServlet extends HttpServlet {
         String profile = request.getParameter("profile");
         String title = request.getParameter("title");
         String[] courseIdsStr = request.getParameterValues("courseIds");
-        
+
         // 验证输入
-        if (username == null || username.trim().isEmpty() || 
-            password == null || password.trim().isEmpty()) {
+        if (username == null || username.trim().isEmpty() ||
+                password == null || password.trim().isEmpty()) {
             request.setAttribute("error", "用户名和密码不能为空");
+            List<CourseModel> courses = courseService.getAllCourses();
+            request.setAttribute("courses", courses);
+            request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
+            return;
+        }
+
+        // 验证密码长度
+        if (password.trim().length() < 6) {
+            request.setAttribute("error", "密码长度不能少于6位");
             List<CourseModel> courses = courseService.getAllCourses();
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
@@ -213,10 +222,19 @@ public class TeacherServlet extends HttpServlet {
         String profile = request.getParameter("profile");
         String title = request.getParameter("title");
         String[] courseIdsStr = request.getParameterValues("courseIds");
-        
+
         // 验证输入
         if (idStr == null || idStr.isEmpty() || username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             request.setAttribute("error", "教师ID、用户名和密码不能为空");
+            List<CourseModel> courses = courseService.getAllCourses();
+            request.setAttribute("courses", courses);
+            request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
+            return;
+        }
+
+        // 验证密码长度
+        if (password.trim().length() < 6) {
+            request.setAttribute("error", "密码长度不能少于6位");
             List<CourseModel> courses = courseService.getAllCourses();
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/edit_teacher.jsp").forward(request, response);
