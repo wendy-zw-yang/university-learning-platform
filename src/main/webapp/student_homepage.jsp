@@ -18,7 +18,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生主页 - 大学学习平台</title>
+    <title>学生主页 - 项目管理学习平台</title>
     <style>
         * {
             margin: 0;

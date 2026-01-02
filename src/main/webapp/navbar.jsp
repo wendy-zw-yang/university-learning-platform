@@ -11,13 +11,13 @@
     String roleBadge = "";
 
     if ("student".equals(currentUser.getRole())) {
-        roleText = "大学学习平台 - 学生中心";
+        roleText = "项目管理学习平台 - 学生中心";
         roleBadge = "学生";
     } else if ("teacher".equals(currentUser.getRole())) {
-        roleText = "大学学习平台 - 教师工作台";
+        roleText = "项目管理学习平台 - 教师工作台";
         roleBadge = "教师";
     } else if ("admin".equals(currentUser.getRole())) {
-        roleText = "大学学习平台 - 管理员控制台";
+        roleText = "项目管理学习平台 - 管理员控制台";
         roleBadge = "管理员";
     }
 %>

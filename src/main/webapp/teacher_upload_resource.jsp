@@ -26,7 +26,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>课程资源管理 - 大学学习平台</title>
+    <title>课程资源管理 - 项目管理学习平台</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         * {
