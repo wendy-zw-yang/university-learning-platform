@@ -19,7 +19,7 @@
 - **王小秋**：数据库模型设计、数据安全、功能测试和bug修复。
 - **焦祖雯**：前端UI/UX、需求分析、README文档、项目部署到GitHub。
 
-###贡献度
+### 贡献度
 - **印如祺**：30%
 - **杨紫雯**：25%
 - **王小秋**：25%
@@ -46,7 +46,7 @@
 - **Week 4**：测试、优化、部署到GitHub（完成）
 
 ## 安装与运行
-1. 克隆仓库：`git clone https://github.com/university-learning-platform.git`
+1. 克隆仓库：`git clone https://github.com/wendy-zw-yang/university-learning-platform`
 2. 安装依赖：`npm install`（前后端分开安装）。
 3. 配置数据库：修改`DBHelper.java`中的MySQL连接信息。
 4. 运行后端：`mvn tomcat10:run`

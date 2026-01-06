@@ -12,22 +12,118 @@
 src/main/java/com/ulp/
 ├── bean/                          # 数据模型层
 │   ├── UserModel.java            # 用户基础模型（包含id、用户名、密码、角色等）
+│   ├── StudentModel.java         # 学生模型（继承UserModel）
+│   ├── TeacherModel.java         # 教师模型（继承UserModel）
+│   ├── AdminModel.java           # 管理员模型
 │   ├── CourseModel.java          # 课程模型
-│   └── TeacherModel.java         # 教师模型（继承UserModel）
-├── service/                       # 业务逻辑层
+│   ├── QuestionModel.java        # 问题模型
+│   ├── AnswerModel.java          # 回答模型
+│   ├── ResourceModel.java        # 资源模型
+│   ├── NotificationModel.java    # 通知模型
+│   ├── CourseWithQuestionCount.java # 带问题计数的课程模型
+│   └── QuestionWithAnswers.java  # 带回答的问题模型
+├── dao/                          # 数据访问层接口
+│   ├── UserDao.java              # 用户数据访问接口
+│   ├── CourseDao.java            # 课程数据访问接口
+│   ├── QuestionDao.java          # 问题数据访问接口
+│   ├── AnswerDao.java            # 回答数据访问接口
+│   ├── ResourceDao.java          # 资源数据访问接口
+│   ├── NotificationDao.java      # 通知数据访问接口
+│   ├── StudentCourseDao.java     # 学生课程数据访问接口
+│   ├── TeacherDao.java           # 教师数据访问接口
+│   ├── AdminDao.java             # 管理员数据访问接口
+│   └── impl/                     # 数据访问层实现
+│       ├── UserDaoImpl.java      # 用户数据访问实现
+│       ├── CourseDaoImpl.java    # 课程数据访问实现
+│       ├── QuestionDaoImpl.java  # 问题数据访问实现
+│       ├── AnswerDaoImpl.java    # 回答数据访问实现
+│       ├── ResourceDaoImpl.java  # 资源数据访问实现
+│       ├── NotificationDaoImpl.java # 通知数据访问实现
+│       ├── StudentCourseDaoImpl.java # 学生课程数据访问实现
+│       ├── TeacherDaoImpl.java   # 教师数据访问实现
+│       └── AdminDaoImpl.java     # 管理员数据访问实现
+├── service/                      # 业务逻辑层
+│   ├── UserService.java          # 用户服务（CRUD操作）
+│   ├── AuthService.java          # 认证服务（登录验证等）
 │   ├── CourseService.java        # 课程服务（CRUD操作）
-│   └── TeacherService.java       # 教师服务（CRUD和课程分配）
-├── servlet/                       # 控制器层
-│   ├── CourseController.java     # 课程控制器
-│   └── TeacherController.java    # 教师控制器
-└── util/
-    └── DBHelper.java             # 数据库连接工具类
+│   ├── TeacherService.java       # 教师服务（CRUD和课程分配）
+│   ├── QuestionService.java      # 问题服务（问题管理）
+│   ├── AnswerService.java        # 回答服务（回答管理）
+│   ├── ResourceService.java      # 资源服务（资源管理）
+│   ├── NotificationService.java  # 通知服务（通知管理）
+│   ├── StudentCourseService.java # 学生课程服务（选课管理）
+│   └── ProfileService.java       # 个人资料服务（资料更新）
+├── servlet/                      # 控制器层
+│   ├── LoginServlet.java         # 登录控制器
+│   ├── LogoutServlet.java        # 登出控制器
+│   ├── RegisterServlet.java      # 注册控制器
+│   ├── HomepageServlet.java      # 首页控制器
+│   ├── ProfileServlet.java       # 个人资料控制器
+│   ├── AdminCourseServlet.java   # 管理员课程控制器
+│   ├── TeacherServlet.java       # 教师管理控制器
+│   ├── QuestionServlet.java      # 问题控制器（学生端）
+│   ├── TeacherQuestionServlet.java # 教师问题控制器
+│   ├── StudentCourseServlet.java # 学生课程控制器
+│   ├── StudentQuestionServlet.java # 学生提问控制器
+│   ├── TeacherResourceServlet.java # 教师资源控制器
+│   ├── AdminResourceServlet.java # 管理员资源控制器
+│   ├── StudentResourceServlet.java # 学生资源控制器
+│   ├── StudentServlet.java       # 学生控制器
+│   ├── TeacherCourseServlet.java # 教师课程控制器
+│   ├── TeacherEditResourceServlet.java # 教师编辑资源控制器
+│   ├── StudentEditResourceServlet.java # 学生编辑资源控制器
+│   ├── AdminQuestionServlet.java # 管理员问题控制器
+│   ├── StudentCenterResourceServlet.java # 学生中心资源控制器
+│   ├── StudentCenterQuestionServlet.java # 学生中心问题控制器
+│   ├── AdminResourcePreviewServlet.java # 管理员资源预览控制器
+│   ├── StudentResourcePreviewServlet.java # 学生资源预览控制器
+│   ├── StudentCenterResourcePreviewServlet.java # 学生中心资源预览控制器
+│   └── NotificationServlet.java  # 通知控制器
+├── filter/                       # 过滤器
+│   ├── AuthenticationFilter.java # 认证过滤器
+│   └── RoleAuthorizationFilter.java # 角色授权过滤器
+└── util/                         # 工具类
+    └── PasswordUtil.java         # 密码工具类（加密解密等）
 
-src/main/webapp/                   # 视图层（JSP页面）
-├── courses.jsp                    # 课程列表页面
-├── edit_course.jsp                # 课程编辑/添加页面
-├── teachers.jsp                   # 教师列表页面
-└── edit_teacher.jsp               # 教师编辑/添加页面
+src/main/webapp/                  # 视图层（JSP页面）
+├── css/                          # 样式文件
+│   └── common.css                # 公共样式
+├── WEB-INF/                      # Web应用配置
+│   └── web.xml                   # Web应用配置文件
+├── login.jsp                     # 登录页面
+├── register.jsp                  # 注册页面
+├── dashboard.jsp                 # 仪表盘页面
+├── profile.jsp                   # 个人资料页面
+├── navbar.jsp                    # 导航栏页面
+├── courses.jsp                   # 课程列表页面
+├── edit_course.jsp               # 课程编辑/添加页面
+├── teachers.jsp                  # 教师列表页面
+├── edit_teacher.jsp              # 教师编辑/添加页面
+├── student_courses.jsp           # 学生课程页面
+├── course_question.jsp           # 课程问题页面
+├── ask_question.jsp              # 提问页面
+├── answer_question.jsp           # 回答问题页面
+├── edit_answer.jsp               # 编辑回答页面
+├── student_resource.jsp          # 学生资源页面
+├── teacher_resource.jsp          # 教师资源页面
+├── admin_resource.jsp            # 管理员资源页面
+├── admin_edit_resource.jsp       # 管理员编辑资源页面
+├── teacher_upload_resource.jsp   # 教师上传资源页面
+├── teacher_edit_resources.jsp    # 教师编辑资源页面
+├── teacher_courses.jsp           # 教师课程页面
+├── teacher_edit_course.jsp       # 教师编辑课程页面
+├── admin_homepage.jsp            # 管理员首页
+├── teacher_homepage.jsp          # 教师首页
+├── student_homepage.jsp          # 学生首页
+├── student_center.jsp            # 学生中心页面
+├── student_center_edit_question.jsp # 学生中心编辑问题页面
+├── student_center_edit_resource.jsp # 学生中心编辑资源页面
+├── student_center_resource_preview.jsp # 学生中心资源预览页面
+├── student_resource_preview.jsp  # 学生资源预览页面
+├── admin_resource_preview.jsp    # 管理员资源预览页面
+├── admin_course_question.jsp     # 管理员课程问题页面
+└── 其他JSP页面...
+
 ```
 
 ## 功能说明
