@@ -13,14 +13,21 @@
 
 （团队共4人）
 
-## 分工
+### 分工
 - **杨紫雯**：系统架构、管理员模块实现、API开发。
-- **印如祺**：学生模块和教师模块实现、通用功能（如通知提醒、个人中心）、前端UI/UX。
+- **印如祺**：学生模块和教师模块实现、通用功能（如通知提醒、个人中心）。
 - **王小秋**：数据库模型设计、数据安全、功能测试和bug修复。
-- **焦祖雯**：需求分析、README文档、项目部署到GitHub。
+- **焦祖雯**：前端UI/UX、需求分析、README文档、项目部署到GitHub。
+
+### 贡献度
+- **印如祺**：30%
+- **杨紫雯**：25%
+- **王小秋**：25%
+- **焦祖雯**：20%
 
 ## 基本设计思路
-采用MVC（Model-View-Controller）架构，前后端分离设计。
+采用MVC（Model-View-Controller）架构，前后端分离设计。、
+
 后端处理业务逻辑和数据存储，前端负责用户交互。
 角色基于权限控制，确保不同用户访问相应功能。
 数据库使用关系型模型存储用户、课程、资源和问答数据。
@@ -39,7 +46,7 @@
 - **Week 4**：测试、优化、部署到GitHub（完成）
 
 ## 安装与运行
-1. 克隆仓库：`git clone https://github.com/university-learning-platform.git`
+1. 克隆仓库：`git clone https://github.com/wendy-zw-yang/university-learning-platform`
 2. 安装依赖：`npm install`（前后端分开安装）。
 3. 配置数据库：修改`DBHelper.java`中的MySQL连接信息。
 4. 运行后端：`mvn tomcat10:run`
